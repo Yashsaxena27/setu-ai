@@ -13,7 +13,6 @@ import {
   FaClock,
 } from "react-icons/fa";
 import { type SuccessScoreRecord } from "../../services/applicationScoreApi";
-import Badge from "./Badge";
 
 interface Props {
   scoreData: SuccessScoreRecord;

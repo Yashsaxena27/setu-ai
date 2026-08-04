@@ -14,7 +14,6 @@ export interface Profile {
   phone: string;
   role?: string;
   rawText?: string;
-  role?: string;
 }
 
 export function getProfile() {

@@ -62,13 +62,6 @@ export default function Landing() {
     return () => clearInterval(timer);
   }, []);
 
-  const stats = [
-    { value: "86+", label: "Verified Schemes", desc: "Monitored directly from government repositories" },
-    { value: "Hybrid", label: "AI Matcher", desc: "Combines strict filtering with NLP models" },
-    { value: "< 1s", label: "Match Time", desc: "Vector search checks your eligibility instantly" },
-    { value: "Active", label: "WhatsApp Ready", desc: "Receive notifications and drafts directly" },
-  ];
-
   const faqs = [
     {
       q: "How does Setu AI verify my eligibility?",
