@@ -6,6 +6,10 @@ import CustomCursor from "../components/effects/CustomCursor";
 import ScrollProgress from "../components/effects/ScrollProgress";
 import WhatsAppWidget from "../components/widgets/WhatsAppWidget";
 import CommandPalette from "../components/ui/CommandPalette";
+import ErrorBoundary from "../components/ui/ErrorBoundary";
+import OfflineBanner from "../components/ui/OfflineBanner";
+import DemoModeBanner from "../components/ui/DemoModeBanner";
+import { DemoModeProvider } from "../context/DemoModeContext";
 
 import EligibilitySimulator from "../pages/EligibilitySimulator";
 import DocumentVerification from "../pages/DocumentVerification";
@@ -43,6 +47,12 @@ function AnimatedRoutes() {
 
       {/* Top scroll progress bar */}
       <ScrollProgress />
+
+      {/* Offline Banner */}
+      <OfflineBanner />
+
+      {/* Demo Mode Top Banner */}
+      <DemoModeBanner />
 
       {/* Interactive custom cursor */}
       <CustomCursor />
@@ -99,8 +109,12 @@ function AnimatedRoutes() {
 
 export default function AppRouter() {
   return (
-    <BrowserRouter>
-      <AnimatedRoutes />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <DemoModeProvider>
+        <BrowserRouter>
+          <AnimatedRoutes />
+        </BrowserRouter>
+      </DemoModeProvider>
+    </ErrorBoundary>
   );
 }

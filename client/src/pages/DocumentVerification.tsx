@@ -155,7 +155,7 @@ export default function DocumentVerification() {
       case "OCR Confidence Low":
         return <Badge variant="warning">OCR Warning</Badge>;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="neutral">{status}</Badge>;
     }
   };
 
@@ -537,8 +537,8 @@ export default function DocumentVerification() {
                 
                 {loadingReadiness ? (
                   <div className="space-y-6 animate-pulse">
-                    <Card className="p-6 bg-white border border-slate-100 h-44" />
-                    <Card className="p-6 bg-white border border-slate-100 h-56" />
+                    <Card className="p-6 bg-white border border-slate-100 h-44"><div className="h-full bg-slate-100 rounded-xl" /></Card>
+                    <Card className="p-6 bg-white border border-slate-100 h-56"><div className="h-full bg-slate-100 rounded-xl" /></Card>
                   </div>
                 ) : !readiness ? (
                   <EmptyState
@@ -569,7 +569,7 @@ export default function DocumentVerification() {
                     </Card>
 
                     {loadingScore ? (
-                      <Card className="p-6 bg-white border border-slate-100 animate-pulse h-48" />
+                      <Card className="p-6 bg-white border border-slate-100 animate-pulse h-48"><div className="h-full bg-slate-100 rounded-xl" /></Card>
                     ) : successScoreData ? (
                       <SuccessScoreCard scoreData={successScoreData} onRefresh={fetchSuccessScore} />
                     ) : null}

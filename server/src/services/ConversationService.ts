@@ -6,17 +6,7 @@ import ChatMessage from "../models/ChatMessage";
 import Scheme from "../models/Scheme";
 import { findMatchingSchemes } from "./matchingService";
 
-let ai: any;
-
-async function getAIClient() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-  return ai;
-}
+import { aiOrchestrator } from "./AIOrchestratorService";
 
 export async function retrieveContextInternal(userId: string, schemeId?: string) {
   const profile = await User.findById(userId) as any;
@@ -98,9 +88,7 @@ export async function generateGroundedAnswerInternal(
   
   const historyRev = [...history].reverse();
 
-  const aiClient = await getAIClient();
-
-  const prompt = `
+  const promptBuilderFn = () => `
 You are an expert government welfare advisor.
 Provide a highly grounded, helpful, and professional answer to the citizen's query.
 
@@ -132,15 +120,13 @@ JSON Output:
 `;
 
   try {
-    const response = await aiClient.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const parsed = await aiOrchestrator.request({
+      taskType: "copilot-chat",
+      profile: context.profile,
+      schemeId,
+      promptBuilderFn,
+      extraData: { sessionId, query }
     });
-
-    const resText = (response.text ?? "").trim();
-    // Safe JSON parse from markdown clean block
-    const cleaned = resText.replace(/```json/g, "").replace(/```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
 
     // Save User message
     const userMsg = new ChatMessage({
@@ -154,7 +140,7 @@ JSON Output:
     const botMsg = new ChatMessage({
       session_id: sessionId,
       sender: "assistant",
-      text: parsed.text || "I am analyzing your matching welfare credentials...",
+      text: parsed.text || (parsed.text === "" ? "" : "I am analyzing your matching welfare credentials..."),
       citations: parsed.citations || [],
       confidence: parsed.confidence || "High",
       explainability: parsed.explainability || "Retrieved context from Setu AI matching pipelines.",
@@ -164,7 +150,7 @@ JSON Output:
     return botMsg;
   } catch (e) {
     console.error("Conversational AI Copilot error:", e);
-    // Fallback save in case of Gemini timeout/malform JSON
+    // Fallback save in case of error
     const userMsg = new ChatMessage({
       session_id: sessionId,
       sender: "user",

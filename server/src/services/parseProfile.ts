@@ -1,19 +1,7 @@
-let ai: any;
-
-async function initializeAI() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-}
+import { aiOrchestrator } from "./AIOrchestratorService";
 
 export async function parseProfile(message: string) {
-  await initializeAI();
-
-  const prompt = `
+  const promptBuilderFn = () => `
 You are an AI that extracts structured user information.
 
 Extract the following fields from the user's message.
@@ -33,29 +21,20 @@ User Message:
 ${message}
 `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
+  const response = await aiOrchestrator.request({
+    taskType: "parse-profile",
+    profile: { rawText: message },
+    promptBuilderFn
   });
 
-  let text = response.text ?? "{}";
-
-  // Remove markdown code blocks if Gemini returns them
-  text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
-  let profile: any = {};
-  try {
-    profile = JSON.parse(text);
-  } catch (err) {
-    console.error("Failed to parse Gemini profile JSON, attempting bracket cleanup:", err);
+  let profile: any = response;
+  if (typeof response === "string") {
     try {
-      const jsonStart = text.indexOf("{");
-      const jsonEnd = text.lastIndexOf("}");
-      if (jsonStart !== -1 && jsonEnd !== -1) {
-        profile = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
-      }
-    } catch (innerErr) {
-      console.error("Failed to clean up and parse profile json:", innerErr);
+      const cleaned = response.replace(/```json/g, "").replace(/```/g, "").trim();
+      profile = JSON.parse(cleaned);
+    } catch (err) {
+      console.error("Failed to parse profile JSON inside parseProfile:", err);
+      profile = {};
     }
   }
 
@@ -63,7 +42,7 @@ ${message}
     age: profile.age != null ? Number(profile.age) : null,
     state: profile.state || null,
     occupation: profile.occupation || null,
-    annual_income: profile.annual_income != null ? Number(profile.annual_income) : null,
+    annual_income: profile.annual_income != null ? Number(profile.annual_income) : (profile.income != null ? Number(profile.income) : null),
     education: profile.education || null,
     rawText: message,
   };

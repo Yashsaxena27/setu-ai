@@ -27,10 +27,12 @@ const authMiddleware = (
     ) as { id: string };
 
     req.userId = decoded.id;
+    (req as any).user = { userId: decoded.id };
 
     next();
 
   } catch (err) {
+    console.error("JWT Verification failed:", err);
     return res.status(401).json({
       message: "Invalid Token",
     });

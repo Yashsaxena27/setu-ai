@@ -302,7 +302,7 @@ export default function SchemeDetail() {
 
           </Card>
           {loadingScore ? (
-            <Card className="p-6 bg-white border border-slate-100 animate-pulse h-48" />
+            <Card className="p-6 bg-white border border-slate-100 animate-pulse h-48"><div className="h-full bg-slate-100 rounded-xl" /></Card>
           ) : successScoreData ? (
             <SuccessScoreCard scoreData={successScoreData} onRefresh={fetchSuccessScore} />
           ) : null}

@@ -18,6 +18,12 @@ export const formatMatchResponse = (matches: any[]) => {
       benefits: scheme.benefits || [],
       required_documents: scheme.required_documents || [],
       official_link: scheme.official_link || "https://myscheme.gov.in",
+      department: scheme.department || "",
+      contactPhone: scheme.contactPhone || "",
+      contactEmail: scheme.contactEmail || "",
+      website: scheme.website || scheme.official_link || "",
+      officeHours: scheme.officeHours || "",
+      supportLanguages: scheme.supportLanguages || [],
     };
   });
 };

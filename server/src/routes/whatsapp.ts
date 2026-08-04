@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { receiveWhatsAppMessage } from "../controllers/whatsappController";
+import { receiveWhatsApp } from "../controllers/communicationController";
 
 const router = Router();
 
-router.post("/webhook", receiveWhatsAppMessage);
+router.post("/webhook", receiveWhatsApp);
 
 export default router;

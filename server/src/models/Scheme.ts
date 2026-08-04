@@ -47,6 +47,12 @@ const schemeSchema = new mongoose.Schema(
     ],
 
     tags: [String],
+    department: String,
+    contactPhone: String,
+    contactEmail: String,
+    website: String,
+    officeHours: String,
+    supportLanguages: [String],
   },
   {
     timestamps: true,

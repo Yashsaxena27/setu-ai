@@ -6,8 +6,16 @@ export async function api<T>(
 ): Promise<T> {
   const token = localStorage.getItem("token");
 
+  if (!navigator.onLine) {
+    throw new Error("You appear to be offline. Please check your internet connection.");
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout for serverless wake-up
+
   try {
     const response = await fetch(`${API_URL}${endpoint}`, {
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
         ...(token && {
@@ -18,12 +26,26 @@ export async function api<T>(
       ...options,
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+      const errData = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        if (!window.location.pathname.includes("/login")) {
+          window.location.href = "/login";
+        }
+      }
+      throw new Error(errData?.message || `Server returned status ${response.status}`);
     }
 
     return await response.json();
   } catch (err: any) {
-    throw new Error(err?.message || "Network request failed");
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      throw new Error("Request timed out. The backend server took too long to respond.");
+    }
+    throw new Error(err?.message || "Network request failed. Please try again.");
   }
 }

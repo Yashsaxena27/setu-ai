@@ -18,7 +18,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 18, max_age: 120, occupation: "Farmer" },
     benefits: ["₹6,000 per year direct benefit transfer", "Seed & fertilizer subsidy support", "3 equal installments of ₹2,000"],
     required_documents: ["Aadhaar Card", "Landholding Ownership Records", "Bank Account Details", "Mobile Number"],
-    official_link: "https://pmkisan.gov.in"
+    official_link: "https://pmkisan.gov.in",
+    department: "Department of Agriculture, Cooperation and Farmers Welfare",
+    contactPhone: "+91 1800 180 1551",
+    contactEmail: "support-kcc@gov.in",
+    website: "https://pmkisan.gov.in",
+    officeHours: "9:00 AM - 6:00 PM, Mon-Sat",
+    supportLanguages: ["Hindi", "English"]
   },
   {
     _id: "s2",
@@ -31,7 +37,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 18, max_age: 120, occupation: "Farmer" },
     benefits: ["Insurance coverage against crop failure", "Low premium rates (1.5% to 2%)", "Direct claim settlement to bank account"],
     required_documents: ["Aadhaar Card", "Land Sowing Certificate", "Bank Account Passbook", "Khasra / Khatauni Copy"],
-    official_link: "https://pmfby.gov.in"
+    official_link: "https://pmfby.gov.in",
+    department: "Department of Agriculture, Cooperation and Farmers Welfare",
+    contactPhone: "+91 1800 180 1551",
+    contactEmail: "support-kcc@gov.in",
+    website: "https://pmfby.gov.in",
+    officeHours: "9:00 AM - 6:00 PM, Mon-Sat",
+    supportLanguages: ["Hindi", "English"]
   },
   {
     _id: "s3",
@@ -44,7 +56,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 18, max_age: 120, occupation: "Farmer" },
     benefits: ["3% interest subvention per annum up to ₹2 Crore", "Credit guarantee coverage under CGTMSE", "Repayment moratorium up to 2 years"],
     required_documents: ["Aadhaar Card", "DPR Project Report", "Bank Account Details", "KYC Documents"],
-    official_link: "https://agriinfra.dac.gov.in"
+    official_link: "https://agriinfra.dac.gov.in",
+    department: "Department of Agriculture, Cooperation and Farmers Welfare",
+    contactPhone: "+91 1800 180 1551",
+    contactEmail: "support-kcc@gov.in",
+    website: "https://agriinfra.dac.gov.in",
+    officeHours: "9:00 AM - 6:00 PM, Mon-Sat",
+    supportLanguages: ["Hindi", "English"]
   },
   {
     _id: "s4",
@@ -57,7 +75,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 15, max_age: 35, occupation: "Student" },
     benefits: ["100% Tuition fee reimbursement", "Monthly maintenance allowance up to ₹1,200", "Book & stationery grant"],
     required_documents: ["Aadhaar Card", "Income Certificate", "Mark Sheet of Previous Exam", "Fee Receipt & Bonafide Certificate"],
-    official_link: "https://scholarships.gov.in"
+    official_link: "https://scholarships.gov.in",
+    department: "Ministry of Education / Department of School Education",
+    contactPhone: "+91 1800 116 023",
+    contactEmail: "scholarships-edu@gov.in",
+    website: "https://scholarships.gov.in",
+    officeHours: "9:30 AM - 5:30 PM, Mon-Fri",
+    supportLanguages: ["English", "Hindi"]
   },
   {
     _id: "s5",
@@ -70,7 +94,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 17, max_age: 30, occupation: "Student" },
     benefits: ["100% interest subvention during course period + 1 year", "Coverage for professional & technical courses", "No collateral security required up to ₹7.5 Lakhs"],
     required_documents: ["Education Loan Sanction Letter", "Income Certificate from Designated Authority", "Aadhaar Card"],
-    official_link: "https://www.education.gov.in"
+    official_link: "https://www.education.gov.in",
+    department: "Ministry of Education / Department of School Education",
+    contactPhone: "+91 1800 116 023",
+    contactEmail: "scholarships-edu@gov.in",
+    website: "https://www.education.gov.in",
+    officeHours: "9:30 AM - 5:30 PM, Mon-Fri",
+    supportLanguages: ["English", "Hindi"]
   },
   {
     _id: "s6",
@@ -83,7 +113,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 17, max_age: 25, occupation: "Student" },
     benefits: ["₹12,000 per annum at graduation level for first 3 years", "₹20,000 per annum at postgraduate level", "Direct Benefit Transfer to student bank account"],
     required_documents: ["Class 12th Board Marksheet", "Income Certificate (< ₹4.5 Lakhs)", "Aadhaar Linked Bank Account"],
-    official_link: "https://scholarships.gov.in"
+    official_link: "https://scholarships.gov.in",
+    department: "Ministry of Education / Department of School Education",
+    contactPhone: "+91 1800 116 023",
+    contactEmail: "scholarships-edu@gov.in",
+    website: "https://scholarships.gov.in",
+    officeHours: "9:30 AM - 5:30 PM, Mon-Fri",
+    supportLanguages: ["English", "Hindi"]
   },
   {
     _id: "s7",
@@ -96,7 +132,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 18, max_age: 120, occupation: "Woman" },
     benefits: ["Attractive fixed interest rate of 7.5% per annum", "Compounded quarterly", "Flexible 2-year tenure with partial withdrawal"],
     required_documents: ["Aadhaar Card", "PAN Card", "Passport Size Photograph", "Account Opening Form"],
-    official_link: "https://www.indiapost.gov.in"
+    official_link: "https://www.indiapost.gov.in",
+    department: "Ministry of Women and Child Development",
+    contactPhone: "+91 1800 111 363",
+    contactEmail: "support-welfare@nic.in",
+    website: "https://www.indiapost.gov.in",
+    officeHours: "9:30 AM - 6:00 PM, Mon-Fri",
+    supportLanguages: ["Hindi", "English"]
   },
   {
     _id: "s8",
@@ -109,7 +151,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 19, max_age: 45, occupation: "Woman" },
     benefits: ["₹5,000 financial incentive in installments", "Nutrition support for mother and child", "Institutional delivery encouragement"],
     required_documents: ["Mother & Child Protection (MCP) Card", "Aadhaar Card", "Bank Passbook"],
-    official_link: "https://pmmvy.nic.in"
+    official_link: "https://pmmvy.nic.in",
+    department: "Ministry of Women and Child Development",
+    contactPhone: "+91 1800 111 363",
+    contactEmail: "support-welfare@nic.in",
+    website: "https://pmmvy.nic.in",
+    officeHours: "9:30 AM - 6:00 PM, Mon-Fri",
+    supportLanguages: ["Hindi", "English"]
   },
   {
     _id: "s9",
@@ -122,7 +170,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 18, max_age: 65, occupation: "Woman" },
     benefits: ["Bank loan from ₹10 Lakhs to ₹1 Crore", "Concessional interest rate & margin money support", "Handholding support through Stand Up India portal"],
     required_documents: ["Identity Proof & Address Proof", "Business Project Report", "Category Certificate / Identity", "Bank Passbook"],
-    official_link: "https://www.standupmitra.in"
+    official_link: "https://www.standupmitra.in",
+    department: "Ministry of Women and Child Development",
+    contactPhone: "+91 1800 111 363",
+    contactEmail: "support-welfare@nic.in",
+    website: "https://www.standupmitra.in",
+    officeHours: "9:30 AM - 6:00 PM, Mon-Fri",
+    supportLanguages: ["Hindi", "English"]
   },
   {
     _id: "s10",
@@ -135,7 +189,13 @@ const FALLBACK_SCHEMES = [
     eligibility_rules: { min_age: 0, max_age: 120, occupation: "Any" },
     benefits: ["₹5 Lakhs free health cover per family annually", "Cashless & paperless access to healthcare services", "No restriction on family size or age"],
     required_documents: ["Aadhaar Card", "Ration Card / PM-JAY Family ID Card"],
-    official_link: "https://pmjay.gov.in"
+    official_link: "https://pmjay.gov.in",
+    department: "Ministry of Health and Family Welfare",
+    contactPhone: "+91 1800 111 565",
+    contactEmail: "support-ayushman@nic.in",
+    website: "https://pmjay.gov.in",
+    officeHours: "24/7 Helpline",
+    supportLanguages: ["English", "Hindi", "All Major Regional Languages"]
   }
 ];
 

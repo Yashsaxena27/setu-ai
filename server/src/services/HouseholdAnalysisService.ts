@@ -3,17 +3,7 @@ import HouseholdAnalysis from "../models/HouseholdAnalysis";
 import Scheme from "../models/Scheme";
 import { findMatchingSchemes } from "./matchingService";
 
-let ai: any;
-
-async function getAIClient() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-  return ai;
-}
+import { aiOrchestrator } from "./AIOrchestratorService";
 
 export function parseBenefitValue(benefitStr: string): number {
   if (!benefitStr) return 0;
@@ -153,9 +143,8 @@ export async function analyzeHouseholdInternal(userId: string) {
 }
 
 async function generateHouseholdInsightsAI(members: any[], memberAnalyses: any[], duplicateWarnings: string[]) {
-  const aiClient = await getAIClient();
-
-  const prompt = `
+  const mainProfile = members[0] || {};
+  const promptBuilderFn = () => `
 You are an expert government welfare case officer.
 Analyze this household family profile and suggest optimal benefit capture.
 
@@ -181,14 +170,22 @@ Rules:
   ];
 
   try {
-    const response = await aiClient.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const response = await aiOrchestrator.request({
+      taskType: "household-recommendations",
+      profile: mainProfile,
+      promptBuilderFn,
+      extraData: { memberAnalyses }
     });
-    const bullets = (response.text ?? "")
-      .split("\n")
-      .map((b: string) => b.trim().replace(/^[-*•]\s*/, ""))
-      .filter((b: string) => b.length > 0);
+
+    let bullets: string[] = [];
+    if (Array.isArray(response)) {
+      bullets = response;
+    } else if (typeof response === "string") {
+      bullets = response
+        .split("\n")
+        .map((b: string) => b.trim().replace(/^[-*•]\s*/, ""))
+        .filter((b: string) => b.length > 0);
+    }
 
     const merged = [...duplicateWarnings, ...bullets].slice(0, 5);
     return merged.length > 0 ? merged : defaultInsights;

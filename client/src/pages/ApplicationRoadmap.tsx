@@ -318,8 +318,8 @@ export default function ApplicationRoadmap() {
             />
           ) : loading ? (
             <div className="space-y-6 animate-pulse">
-              <Card className="p-6 bg-white border border-slate-100 h-44" />
-              <Card className="p-6 bg-white border border-slate-100 h-96" />
+              <Card className="p-6 bg-white border border-slate-100 h-44"><div className="h-full bg-slate-100 rounded-xl" /></Card>
+              <Card className="p-6 bg-white border border-slate-100 h-96"><div className="h-full bg-slate-100 rounded-xl" /></Card>
             </div>
           ) : !roadmap ? (
             <EmptyState

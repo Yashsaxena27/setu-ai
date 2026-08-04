@@ -2,17 +2,7 @@ import Scheme from "../models/Scheme";
 import SchemeUpdate from "../models/SchemeUpdate";
 import User from "../models/user";
 
-let ai: any;
-
-async function getAIClient() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-  return ai;
-}
+import { aiOrchestrator } from "./AIOrchestratorService";
 
 export interface ModificationField {
   field_name: string;
@@ -74,9 +64,8 @@ export function detectChanges(oldScheme: any, newScheme: any): ModificationField
 }
 
 export async function generateImpactAnalysis(update: any, userProfile: any, schemeName: string) {
-  const aiClient = await getAIClient();
-
-  const prompt = `
+  const schemeId = update.scheme_id ? String(update.scheme_id) : undefined;
+  const promptBuilderFn = () => `
 You are an expert government welfare case officer.
 Explain how a government welfare scheme change affects the applicant.
 
@@ -103,11 +92,13 @@ Rules:
 `;
 
   try {
-    const response = await aiClient.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const response = await aiOrchestrator.request({
+      taskType: "impact-analysis",
+      profile: userProfile,
+      schemeId,
+      promptBuilderFn
     });
-    return (response.text ?? "").trim().replace(/[".]/g, "");
+    return (response ?? "").trim().replace(/[".]/g, "");
   } catch (e) {
     console.error("Impact analysis failed:", e);
     return "Check details for updated eligibility checklist criteria adjustments";

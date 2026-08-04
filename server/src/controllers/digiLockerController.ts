@@ -2,17 +2,7 @@ import { Request, Response } from "express";
 import User from "../models/user";
 import DocumentVerification from "../models/DocumentVerification";
 
-let ai: any;
-
-async function getAIClient() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-  return ai;
-}
+import { aiOrchestrator } from "../services/AIOrchestratorService";
 
 // Mock government document store data
 const MOCK_DIGILOCKER_DOCUMENTS = [
@@ -103,10 +93,7 @@ export const importDigiLockerDocument = async (req: Request, res: Response) => {
     const profile = await User.findById(userId);
     if (!profile) return res.status(404).json({ success: false, message: "User not found" });
 
-    const aiClient = await getAIClient();
-
-    // Prompt Gemini to extract fields from the document text
-    const prompt = `
+    const promptBuilderFn = () => `
 You are an expert government document parser.
 Analyze this official certificate text and extract profile parameters.
 
@@ -128,14 +115,17 @@ Return ONLY a valid JSON block matching this exact TypeScript structure:
 }
 `;
 
-    const response = await aiClient.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const response = await aiOrchestrator.request({
+      taskType: "digilocker-parse",
+      profile,
+      promptBuilderFn
     });
 
-    const resText = (response.text ?? "").trim();
-    const cleaned = resText.replace(/```json/g, "").replace(/```/g, "").trim();
-    const extracted = JSON.parse(cleaned);
+    let extracted: any = response;
+    if (typeof response === "string") {
+      const cleaned = response.replace(/```json/g, "").replace(/```/g, "").trim();
+      extracted = JSON.parse(cleaned);
+    }
 
     // Save as Verified Document
     const verification = new DocumentVerification({

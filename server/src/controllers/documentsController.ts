@@ -3,17 +3,7 @@ import DocumentVerification from "../models/DocumentVerification";
 import User from "../models/user";
 import Scheme from "../models/Scheme";
 
-let ai: any;
-
-async function getAIClient() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-  return ai;
-}
+import { aiOrchestrator } from "../services/AIOrchestratorService";
 
 function isNameMatching(docName: string, profileName: string): boolean {
   if (!docName || !profileName) return false;
@@ -113,8 +103,7 @@ export const analyzeDocument = async (req: Request, res: Response) => {
       });
     }
 
-    const aiClient = await getAIClient();
-    const prompt = `
+    const promptBuilderFn = () => `
 You are an expert government welfare document officer.
 Analyze the provided document image/PDF and perform structured OCR and quality extraction.
 You MUST output your analysis strictly in JSON format matching this schema:
@@ -154,29 +143,33 @@ Rules:
       cleanBase64 = cleanBase64.split(";base64,").pop() || "";
     }
 
-    const response = await aiClient.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          inlineData: {
-            mimeType: doc.mimeType || "image/jpeg",
-            data: cleanBase64,
-          },
-        },
-        prompt,
-      ],
-      config: {
-        responseMimeType: "application/json",
-      },
+    const aiJSON = await aiOrchestrator.request({
+      taskType: "ocr",
+      profile: userProfile,
+      schemeId: doc.scheme_id ? String(doc.scheme_id) : undefined,
+      promptBuilderFn,
+      extraData: {
+        fileData: cleanBase64,
+        mimeType: doc.mimeType || "image/jpeg"
+      }
     });
 
-    const aiText = response.text || "";
-    let aiJSON: any;
-    try {
-      aiJSON = JSON.parse(aiText.trim());
-    } catch (e) {
-      console.warn("JSON parsing failed, raw fallback:", aiText, e);
-      throw new Error("Failed to compile structured OCR verification response");
+    const aiText = JSON.stringify(aiJSON);
+
+    if (aiJSON.ocr_data?.name === "Generating...") {
+      doc.document_type = "Unknown Document";
+      doc.ocr_data = aiJSON.ocr_data;
+      doc.validation_status = "Pending";
+      doc.confidence = 0;
+      doc.quality_score = 100;
+      doc.quality_issues = [];
+      await doc.save();
+
+      return res.json({
+        success: true,
+        document: doc,
+        issues: ["Document analysis is in progress. Please refresh in a moment."],
+      });
     }
 
     // Programmatic Validation & Reconciliation against User Profile

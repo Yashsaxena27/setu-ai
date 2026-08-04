@@ -9,9 +9,12 @@ import {
   FaSearch,
   FaArrowDown,
   FaWhatsapp,
+  FaPlayCircle,
+  FaShieldAlt,
 } from "react-icons/fa";
 
 import { useAuth } from "../context/AuthContext";
+import { useDemoMode } from "../context/DemoModeContext";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import AnimatedBridge from "../components/effects/AnimatedBridge";
@@ -24,9 +27,9 @@ import Badge from "../components/ui/Badge";
 import { BridgeIcon } from "../components/ui/BridgeLogo";
 import Reveal from "../components/effects/Reveal";
 import TiltCard from "../components/effects/TiltCard";
-import AnimatedCounter from "../components/effects/AnimatedCounter";
 import PipelineSection from "../components/ui/PipelineSection";
 import MagneticButton from "../components/effects/MagneticButton";
+import ImpactCounter from "../components/ui/ImpactCounter";
 
 const HERO_WORDS = ["welfare", "schemes", "subsidies", "benefits", "support"];
 
@@ -36,6 +39,7 @@ export default function Landing() {
   const [wordIndex, setWordIndex] = useState(0);
 
   const { user } = useAuth();
+  const { enableDemoMode } = useDemoMode();
   const [hasProfile, setHasProfile] = useState(false);
 
   useEffect(() => {
@@ -132,21 +136,48 @@ export default function Landing() {
               </Reveal>
 
               <Reveal direction="up" delayOffset={0.3}>
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <MagneticButton>
-                    <Button onClick={() => navigate("/consent")} size="lg" className="!rounded-full">
-                      Find my schemes &rarr;
-                    </Button>
-                  </MagneticButton>
+                <div className="space-y-4 pt-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <MagneticButton>
+                      <Button onClick={() => navigate("/consent")} size="lg" className="!rounded-full shadow-md">
+                        Find my schemes &rarr;
+                      </Button>
+                    </MagneticButton>
 
-                  <Button 
-                    onClick={() => window.dispatchEvent(new Event("open-whatsapp-widget"))}
-                    variant="ghost" 
-                    size="lg"
-                    className="!rounded-full !border-[#0F172A] !text-[#0F172A] hover:!border-[#14B8A6] hover:!text-[#14B8A6] hover:!bg-[#14B8A6]/5 transition-colors duration-300 flex items-center gap-2 bg-transparent border-2"
-                  >
-                    <FaWhatsapp className="text-lg" /> Message us on WhatsApp
-                  </Button>
+                    <Button
+                      onClick={() => {
+                        enableDemoMode();
+                        navigate("/results");
+                      }}
+                      variant="secondary"
+                      size="lg"
+                      className="!rounded-full border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 font-bold transition flex items-center gap-2"
+                    >
+                      <FaPlayCircle className="text-amber-600 text-lg" /> Quick Demo Mode (Kamla Devi)
+                    </Button>
+
+                    <Button 
+                      onClick={() => window.dispatchEvent(new Event("open-whatsapp-widget"))}
+                      variant="ghost" 
+                      size="lg"
+                      className="!rounded-full !border-[#0F172A]/20 !text-[#0F172A] hover:!border-[#14B8A6] hover:!text-[#14B8A6] hover:!bg-[#14B8A6]/5 transition-colors duration-300 flex items-center gap-2 bg-transparent border"
+                    >
+                      <FaWhatsapp className="text-lg text-emerald-600" /> WhatsApp
+                    </Button>
+                  </div>
+
+                  {/* Trust badges row */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold text-slate-500 pt-2 border-t border-slate-200/60">
+                    <span className="flex items-center gap-1 text-[#0D9488]">
+                      <FaShieldAlt className="h-3 w-3" /> DPDP Act 2023 Compliant
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span>Zero Data Resale</span>
+                    <span className="text-slate-300">•</span>
+                    <span>Direct Government Links</span>
+                    <span className="text-slate-300">•</span>
+                    <span>256-bit Encrypted</span>
+                  </div>
                 </div>
               </Reveal>
             </div>
@@ -160,7 +191,7 @@ export default function Landing() {
           </div>
 
           {/* Scroll Cue Indicator */}
-          <div className="flex justify-center pt-16 sm:pt-24">
+          <div className="flex justify-center pt-12 sm:pt-16">
             <a
               href="#features"
               className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-[#14B8A6] transition group"
@@ -177,23 +208,9 @@ export default function Landing() {
         </section>
 
       <PageContainer>
-        {/* Statistics Section */}
-        <section className="pt-10 pb-10 border-y border-[#0F172A]/5 bg-white/40 rounded-3xl px-6 mt-6 mb-8 shadow-soft">
-          <div className="grid grid-cols-2 gap-8 lg:grid-cols-4 text-center">
-            {stats.map((stat, i) => (
-              <Reveal key={i} index={i} direction="up">
-                <div className="space-y-1">
-                  <p className="font-serif text-4xl font-extrabold text-[#0F172A] sm:text-5xl">
-                    <AnimatedCounter value={stat.value} />
-                  </p>
-                  <p className="text-sm font-bold text-[#0F172A]">{stat.label}</p>
-                  <p className="text-xs text-slate-400 max-w-[180px] mx-auto font-medium">
-                    {stat.desc}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+        {/* Statistics Section (ImpactCounter) */}
+        <section className="pt-8 pb-8 border-y border-[#0F172A]/5 bg-white/50 rounded-3xl px-6 mt-4 mb-8 shadow-soft">
+          <ImpactCounter />
         </section>
 
         <PipelineSection />

@@ -23,6 +23,7 @@ import familyRoutes from "./routes/family";
 import chatRoutes from "./routes/chat";
 import digiLockerRoutes from "./routes/digiLocker";
 import adminRoutes from "./routes/admin";
+import communicationRoutes from "./routes/communication";
 
 dotenv.config();
 
@@ -65,4 +66,5 @@ app.use("/family", familyRoutes);
 app.use("/chat", chatRoutes);
 app.use("/digilocker", digiLockerRoutes);
 app.use("/admin", adminRoutes);
+app.use("/communication", communicationRoutes);
 export default app;

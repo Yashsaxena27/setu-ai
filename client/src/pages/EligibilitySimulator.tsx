@@ -210,7 +210,7 @@ export default function EligibilitySimulator() {
     async function fetchBaselineMatches() {
       try {
         // Run simulator on original vs original to get the matches count baseline
-        const data = await simulateEligibility(originalProfile, originalProfile);
+        const data: any = await simulateEligibility(originalProfile, originalProfile);
         setOriginalMatchesCount((data.unchanged?.length || 0) + (data.lost?.length || 0));
       } catch (e) {
         console.warn("Failed baseline matches fetch:", e);
@@ -876,7 +876,7 @@ export default function EligibilitySimulator() {
                         <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Suggested Documents Checklist</p>
                         <div className="flex flex-wrap gap-1.5">
                           {results.summary.suggestedDocuments.map((doc: string) => (
-                            <Badge key={doc} variant="secondary" size="sm">
+                            <Badge key={doc} variant="neutral" size="sm">
                               ✓ {doc}
                             </Badge>
                           ))}
@@ -1116,7 +1116,7 @@ export default function EligibilitySimulator() {
                         <h3 className="font-serif text-xl font-extrabold text-[#0F172A] flex items-center gap-2">
                           <span className="h-3 w-3 rounded-full bg-slate-400" /> Still Eligible Schemes
                         </h3>
-                        <Badge variant="secondary">={results.unchanged?.length || 0} UNCHANGED</Badge>
+                        <Badge variant="neutral">={results.unchanged?.length || 0} UNCHANGED</Badge>
                       </div>
 
                       {results.unchanged?.length === 0 ? (

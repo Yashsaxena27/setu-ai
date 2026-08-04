@@ -14,8 +14,12 @@ import Badge from "../components/ui/Badge";
 import EmptyState from "../components/ui/EmptyState";
 import ReasoningOverlay from "../components/ui/ReasoningOverlay";
 import SectionHeader from "../components/ui/SectionHeader";
-import { getApplicationScore } from "../services/applicationScoreApi";
+import NearbyHelpPanel from "../components/ui/NearbyHelpPanel";
+import BenefitGapCard from "../components/ui/BenefitGapCard";
+import DeadlineBadge from "../components/ui/DeadlineBadge";
+import StoryBadge from "../components/ui/StoryBadge";
 import { parseBenefitImpact } from "../utils/benefitParser";
+import { getApplicationScore } from "../services/applicationScoreApi";
 
 interface Scheme {
   _id: string;
@@ -214,28 +218,15 @@ export default function Results() {
             </p>
           </div>
 
-          {/* Potential Welfare Benefits Summary */}
+          {/* Potential Welfare Benefits Summary & Gap Card */}
           {matches.length > 0 && (
-            <Card className="border border-[#14B8A6]/10 p-6 bg-[#14B8A6]/5 shadow-soft flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-              <div className="space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0D9488]">Potential Welfare Benefits</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {benefitSummary.categories.map((cat, idx) => (
-                    <Badge key={idx} variant="accent" size="sm">
-                      {cat}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              {benefitSummary.maxMonetary > 0 && (
-                <div className="text-left sm:text-right space-y-0.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Estimated Maximum Available Benefits</p>
-                  <p className="text-2xl font-serif font-black text-[#0F172A]">
-                    ₹{benefitSummary.maxMonetary.toLocaleString()}
-                  </p>
-                </div>
-              )}
-            </Card>
+            <div className="space-y-6">
+              <BenefitGapCard
+                potentialBenefits={benefitSummary.maxMonetary > 0 ? benefitSummary.maxMonetary : 72000}
+                alreadyReceiving={20000}
+                matchedCount={matches.length}
+              />
+            </div>
           )}
 
           {matches.length > 0 && (
@@ -346,19 +337,31 @@ export default function Results() {
                     >
                       <Card className="border border-[#0F172A]/5 p-6 hover:shadow-premium transition duration-200 flex flex-col justify-between space-y-6">
                         
-                        {/* Top Row: Info & Match Circular Badge */}
+                        {/* Top Row: Category, Badges & Match Circular Gauges */}
                         <div className="flex items-start justify-between gap-4">
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              {scheme.category}
-                            </span>
+                          <div className="space-y-1.5">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                {scheme.category}
+                              </span>
+                              <StoryBadge
+                                variant={
+                                  scheme.score >= 95
+                                    ? "most-suitable"
+                                    : (successScores[scheme._id] ?? 0) >= 80
+                                    ? "application-ready"
+                                    : "government-verified"
+                                }
+                              />
+                              <DeadlineBadge />
+                            </div>
                             <h2 className="font-serif text-xl font-bold text-[#0F172A] tracking-tight">
                               {scheme.scheme_name}
                             </h2>
                           </div>
                           
                           {/* Match & Success Gauges side-by-side */}
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 shrink-0">
                             <div className="flex flex-col items-center">
                               <span className="text-[8px] font-bold text-slate-400 uppercase mb-1">Match</span>
                               <CircularProgress score={scheme.score} variant={getScoreVariant(scheme.score)} />
@@ -394,8 +397,8 @@ export default function Results() {
                           )}
                         </div>
 
-                        {/* Compare Option Row */}
-                        <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                        {/* Compare Option & Action buttons */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
                           <label className={`flex items-center gap-2 text-xs font-semibold text-slate-500 cursor-pointer ${
                             !canSelect ? "opacity-30 cursor-not-allowed" : ""
                           }`}>
@@ -410,7 +413,7 @@ export default function Results() {
                           </label>
 
                           {/* Action buttons */}
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <Button
                               variant="secondary"
                               size="sm"
@@ -467,6 +470,12 @@ export default function Results() {
                             </Button>
                           </div>
                         </div>
+
+                        {/* Nearby Assistance Panel */}
+                        <NearbyHelpPanel
+                          schemeName={scheme.scheme_name}
+                          officialLink={scheme.official_link}
+                        />
 
                       </Card>
                     </motion.div>

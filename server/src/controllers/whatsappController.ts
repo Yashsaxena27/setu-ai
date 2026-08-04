@@ -13,6 +13,19 @@ export const receiveWhatsAppMessage = async (
 
     const message = (req.body.Body || "").trim();
 
+    if (message.toLowerCase().startsWith("join ")) {
+      res.set("Content-Type", "text/xml");
+      return res.send(`
+<Response>
+  <Message>Welcome to Setu AI Welfare Assistant! 🌟
+
+Please describe your profile details to find matching government welfare schemes. For example:
+"I am a 45-year-old female farmer from Uttar Pradesh with an annual income of ₹1.2 Lakh."
+  </Message>
+</Response>
+`);
+    }
+
     if (!message) {
       res.set("Content-Type", "text/xml");
 

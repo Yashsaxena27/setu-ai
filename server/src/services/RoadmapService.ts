@@ -5,17 +5,7 @@ import ApplicationScore from "../models/ApplicationScore";
 import ApplicationRoadmap from "../models/ApplicationRoadmap";
 import { calculateProfileScore } from "./ApplicationScoringService";
 
-let ai: any;
-
-async function getAIClient() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-  return ai;
-}
+import { aiOrchestrator } from "./AIOrchestratorService";
 
 export async function generateRoadmapInternal(userId: string, schemeId: string) {
   const scheme = await Scheme.findById(schemeId);
@@ -397,11 +387,10 @@ export async function generateRoadmapAIAdvice(
   successScore: number,
   completionPercentage: number
 ) {
-  const aiClient = await getAIClient();
-
+  const schemeId = scheme._id ? String(scheme._id) : undefined;
   const activeStep = steps.find((s) => s.status !== "Completed") || steps[steps.length - 1];
 
-  const prompt = `
+  const promptBuilderFn = () => `
 You are an expert government welfare case officer.
 Provide personalized AI Roadmap guidance for the user.
 
@@ -426,14 +415,11 @@ Rules:
 - Return ONLY the paragraph text. Do NOT add headers or markdown lists.
 `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-    return (response.text ?? "").trim();
-  } catch (e) {
-    console.error("AI Guidance failed:", e);
-    return `Based on your progress, you should upload your outstanding mandatory documents next to increase compliance. This will maximize your application success score.`;
-  }
+  return aiOrchestrator.request({
+    taskType: "roadmap-tips",
+    profile,
+    schemeId,
+    promptBuilderFn,
+    extraData: { successScore, completionPercentage }
+  });
 }

@@ -351,7 +351,6 @@ export default function SchemeUpdates() {
                         </Button>
                       </div>
                     </div>
-
                   </Card>
                 </motion.div>
               ))}

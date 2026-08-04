@@ -1,33 +1,11 @@
-import { cache } from "../utils/cache";
-import { profileHash } from "../utils/hash";
-
-let ai: any;
-
-async function initializeAI() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-}
+import { aiOrchestrator } from "./AIOrchestratorService";
 
 export async function generateWhyMatch(
   profile: any,
   scheme: any
 ) {
-  await initializeAI();
-
-  const key = `explain-${scheme._id}-${profileHash(profile)}`;
-
-const cached = cache.get<string>(key);
-
-if (cached) {
-  console.log("✅ Cache Hit");
-  return cached;
-}
-
-  const prompt = `
+  const schemeId = scheme._id ? String(scheme._id) : undefined;
+  const promptBuilderFn = () => `
 You are an expert government welfare assistant.
 
 User Profile:
@@ -55,32 +33,12 @@ Example output:
 - Required applicant category matches.
 `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-
-    const explanation = response.text ?? "";
-
-    cache.set(key, explanation);
-
-    return explanation;
-  } catch (error) {
-    console.error("Gemini Error:", error);
-
-    const cached = cache.get<string>(key);
-
-    if (cached) {
-      return cached;
-    }
-
-    return `
-• This scheme appears to match your profile.
-• Please verify the eligibility on the official government website.
-• AI explanation is temporarily unavailable.
-`;
-  }
+  return aiOrchestrator.request({
+    taskType: "why-match",
+    profile,
+    schemeId,
+    promptBuilderFn,
+  });
 }
 
 export async function generateWhySimulationChange(
@@ -88,17 +46,8 @@ export async function generateWhySimulationChange(
   simulatedProfile: any,
   scheme: any
 ) {
-  await initializeAI();
-
-  const key = `explain-sim-${scheme._id}-${profileHash(originalProfile)}-${profileHash(simulatedProfile)}`;
-
-  const cached = cache.get<string>(key);
-  if (cached) {
-    console.log("✅ Simulation Explain Cache Hit");
-    return cached;
-  }
-
-  const prompt = `
+  const schemeId = scheme._id ? String(scheme._id) : undefined;
+  const promptBuilderFn = () => `
 You are an expert government welfare assistant.
 
 Original User Profile:
@@ -125,20 +74,13 @@ Example output:
 Earlier your annual income exceeded the eligibility threshold. After reducing the income to ₹2 lakh, you now satisfy the financial criteria of PM Kisan.
 `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-
-    const explanation = response.text ?? "";
-    const cleanExplanation = explanation.trim();
-    cache.set(key, cleanExplanation);
-    return cleanExplanation;
-  } catch (error) {
-    console.error("Gemini Simulation Error:", error);
-    return `Earlier demographic constraints prevented eligibility. After updating your profile parameters, you now satisfy the criteria for ${scheme.scheme_name}.`;
-  }
+  return aiOrchestrator.request({
+    taskType: "simulation-change",
+    profile: originalProfile, // use original profile context
+    schemeId,
+    promptBuilderFn,
+    extraData: { simulatedProfile }
+  });
 }
 
 export async function generateSimulationSummaryText(
@@ -148,15 +90,7 @@ export async function generateSimulationSummaryText(
   totalGainedBenefits: number,
   gainedSchemes: any[]
 ) {
-  await initializeAI();
-
-  const key = `sim-summary-${gainedCount}-${totalGainedBenefits}-${profileHash(originalProfile)}-${profileHash(simulatedProfile)}`;
-  const cached = cache.get<string>(key);
-  if (cached) {
-    return cached;
-  }
-
-  const prompt = `
+  const promptBuilderFn = () => `
 You are an expert government welfare assistant.
 Original Profile: ${JSON.stringify(originalProfile)}
 Simulated Profile: ${JSON.stringify(simulatedProfile)}
@@ -169,19 +103,12 @@ Generate a single sentence AI summary of the simulation results for a dashboard 
 Make it specific to the actual changes (e.g., if the user turned 60, mention turning senior citizen; if income reduced, mention the income change). Keep it very brief (1 sentence). Do not hallucinate.
 `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-    const summary = response.text ?? "";
-    const cleanSummary = summary.trim();
-    cache.set(key, cleanSummary);
-    return cleanSummary;
-  } catch (error) {
-    console.error("Gemini Summary Error:", error);
-    return `If this life event occurs, you will gain eligibility for ${gainedCount} additional schemes worth approximately ₹${totalGainedBenefits.toLocaleString()} in benefits.`;
-  }
+  return aiOrchestrator.request({
+    taskType: "simulation-summary-text",
+    profile: originalProfile,
+    promptBuilderFn,
+    extraData: { simulatedProfile, gainedCount, totalGainedBenefits, gainedSchemes }
+  });
 }
 
 export async function generateWhySuccessScore(
@@ -198,17 +125,8 @@ export async function generateWhySuccessScore(
   recommendations: any[],
   risks: string[]
 ) {
-  await initializeAI();
-
-  const key = `explain-score-${scheme._id}-${profileHash(profile)}-${overallScore}`;
-
-  const cached = cache.get<string>(key);
-  if (cached) {
-    console.log("✅ Success Score Explain Cache Hit");
-    return cached;
-  }
-
-  const prompt = `
+  const schemeId = scheme._id ? String(scheme._id) : undefined;
+  const promptBuilderFn = () => `
 You are an expert government welfare case officer.
 Explain the application success score results for the applicant.
 
@@ -241,17 +159,11 @@ Rules:
 - Do NOT include any bullet points, lists, or headers in the final output. Return ONLY the paragraph.
 `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-    const explanation = response.text ?? "";
-    const cleanExplanation = explanation.trim();
-    cache.set(key, cleanExplanation);
-    return cleanExplanation;
-  } catch (error) {
-    console.error("Gemini Success Score Error:", error);
-    return `Your eligibility matches the requirements. However, missing or unverified documents affect your readiness score. Complete the checklist recommendations to maximize probability of approval.`;
-  }
+  return aiOrchestrator.request({
+    taskType: "score-narrative",
+    profile,
+    schemeId,
+    promptBuilderFn,
+    extraData: { subScores, overallScore, recommendations, risks }
+  });
 }

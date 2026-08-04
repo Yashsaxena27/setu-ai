@@ -23,6 +23,7 @@ import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import SectionHeader from "../components/ui/SectionHeader";
+import EmptyState from "../components/ui/EmptyState";
 import Select from "../components/ui/Select";
 import Input from "../components/ui/Input";
 import EmptyState from "../components/ui/EmptyState";
@@ -306,9 +307,9 @@ export default function Family() {
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
-              <Card className="h-44 bg-white border border-slate-100" />
-              <Card className="h-44 bg-white border border-slate-100" />
-              <Card className="h-44 bg-white border border-slate-100" />
+              <Card className="h-44 bg-white border border-slate-100"><div className="h-full bg-slate-100 rounded-xl" /></Card>
+              <Card className="h-44 bg-white border border-slate-100"><div className="h-full bg-slate-100 rounded-xl" /></Card>
+              <Card className="h-44 bg-white border border-slate-100"><div className="h-full bg-slate-100 rounded-xl" /></Card>
             </div>
           ) : members.length === 0 ? (
             <EmptyState

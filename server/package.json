@@ -80,7 +80,10 @@
   "mongoose": "^8.18.0",
  
    
-  "morgan": "^1.11.0"
+  "morgan": "^1.11.0",
+ 
+   
+  "nodemailer": "^9.0.4"
  
   },
  
@@ -106,6 +109,9 @@
  
    
   "@types/node": "^24.3.0",
+ 
+   
+  "@types/nodemailer": "^8.0.1",
  
    
   "ts-node": "^10.9.2",

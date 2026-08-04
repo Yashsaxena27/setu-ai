@@ -4,18 +4,9 @@ import Scheme from "../models/Scheme";
 import DocumentVerification from "../models/DocumentVerification";
 import AdminLog from "../models/AdminLog";
 import SystemNotification from "../models/SystemNotification";
+import CommunicationLog from "../models/CommunicationLog";
 
-let ai: any;
-
-async function getAIClient() {
-  if (!ai) {
-    const { GoogleGenAI } = await import("@google/genai");
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!,
-    });
-  }
-  return ai;
-}
+import { aiOrchestrator } from "../services/AIOrchestratorService";
 
 export const getDashboardStats = async (req: Request, res: Response) => {
   try {
@@ -31,6 +22,34 @@ export const getDashboardStats = async (req: Request, res: Response) => {
     const totalUsers = await User.countDocuments();
     const totalDocs = await DocumentVerification.countDocuments();
     const totalSchemes = await Scheme.countDocuments();
+
+    // Channel statistics
+    let whatsappUsers = 0;
+    let smsUsers = 0;
+    let voiceUsers = 0;
+    let emailUsers = 0;
+    let dailyInteractions = 0;
+    let avgResponseTime = 1200; // default 1.2s
+
+    try {
+      whatsappUsers = (await CommunicationLog.distinct("sender", { channel: "WhatsApp" })).length;
+      smsUsers = (await CommunicationLog.distinct("sender", { channel: "SMS" })).length;
+      voiceUsers = (await CommunicationLog.distinct("sender", { channel: "Voice" })).length;
+      emailUsers = (await CommunicationLog.distinct("sender", { channel: "Email" })).length;
+
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      dailyInteractions = await CommunicationLog.countDocuments({ createdAt: { $gte: oneDayAgo } });
+
+      const avgRes = await CommunicationLog.aggregate([
+        { $match: { direction: "Incoming", durationMs: { $gt: 0 } } },
+        { $group: { _id: null, avgTime: { $avg: "$durationMs" } } }
+      ]);
+      if (avgRes && avgRes.length > 0) {
+        avgResponseTime = Math.round(avgRes[0].avgTime);
+      }
+    } catch (err) {
+      console.error("Dashboard communication log query error:", err);
+    }
 
     // Log admin action
     const log = new AdminLog({
@@ -52,6 +71,12 @@ export const getDashboardStats = async (req: Request, res: Response) => {
         applicationsCompleted: Math.round(totalUsers * 0.3),
         successRate: 84,
         verificationRate: 91,
+        whatsappUsers,
+        smsUsers,
+        voiceUsers,
+        emailUsers,
+        dailyInteractions,
+        avgResponseTime,
       },
     });
   } catch (err: any) {
@@ -65,8 +90,7 @@ export const getWelfareAnalytics = async (req: Request, res: Response) => {
     const totalUsers = await User.countDocuments();
     
     // Call Gemini to write admin-centric reports insights
-    const aiClient = await getAIClient();
-    const prompt = `
+    const promptBuilderFn = () => `
 You are an expert government welfare metrics analyst.
 Review Setu AI portal metrics summary:
 - Total Citizens onboarded: ${totalUsers}
@@ -84,14 +108,19 @@ Write 2 bullet points (max 12 words per bullet) of administrative insights. Neve
     ];
 
     try {
-      const response = await aiClient.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
+      const response = await aiOrchestrator.request({
+        taskType: "admin-insights",
+        profile: { totalUsers },
+        promptBuilderFn
       });
-      aiInsights = (response.text ?? "")
-        .split("\n")
-        .map((b: string) => b.trim().replace(/^[-*•]\s*/, ""))
-        .filter((b: string) => b.length > 0);
+      if (Array.isArray(response)) {
+        aiInsights = response;
+      } else if (typeof response === "string") {
+        aiInsights = response
+          .split("\n")
+          .map((b: string) => b.trim().replace(/^[-*•]\s*/, ""))
+          .filter((b: string) => b.length > 0);
+      }
     } catch (e) {
       console.error("Admin AI Insights failed:", e);
     }
