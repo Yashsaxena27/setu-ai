@@ -34,6 +34,12 @@ const userSchema = new mongoose.Schema(
     consent_given: Boolean,
 
     consent_timestamp: Date,
+
+    role: {
+      type: String,
+      enum: ["Citizen", "Moderator", "Scheme Editor", "District Admin", "State Admin", "Super Admin"],
+      default: "Citizen",
+    },
   },
   {
     timestamps: true,

@@ -94,6 +94,39 @@ export default function Results() {
   });
   const [animatedCount, setAnimatedCount] = useState(0);
 
+  // Success scoring states
+  const [sortBy, setSortBy] = useState<"success" | "match">("success");
+  const [successScores, setSuccessScores] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (matches.length === 0) return;
+    const fetchScores = async () => {
+      const scoresMap: Record<string, number> = {};
+      await Promise.all(
+        matches.map(async (scheme) => {
+          try {
+            const res = await getApplicationScore(scheme._id);
+            scoresMap[scheme._id] = res.score.overall_score;
+          } catch (e) {
+            scoresMap[scheme._id] = 50; // Default fallback
+          }
+        })
+      );
+      setSuccessScores(scoresMap);
+    };
+    fetchScores();
+  }, [matches]);
+
+  const sortedMatches = [...matches].sort((a, b) => {
+    if (sortBy === "success") {
+      const scoreA = successScores[a._id] ?? 0;
+      const scoreB = successScores[b._id] ?? 0;
+      return scoreB - scoreA;
+    } else {
+      return b.score - a.score;
+    }
+  });
+
   useEffect(() => {
     const hasProfile = localStorage.getItem("profile");
     const hasMatches = localStorage.getItem("latestMatches");
@@ -203,6 +236,68 @@ export default function Results() {
             </Card>
           )}
 
+          {matches.length > 0 && (
+            <div className="space-y-6">
+              {/* Sort selector */}
+              <div className="flex items-center justify-between gap-4 bg-white border border-[#0F172A]/5 p-4 rounded-2xl shadow-soft">
+                <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <FaSortAmountDown className="text-[#14B8A6]" /> Sort matched options
+                </span>
+                <select
+                  value={sortBy}
+                  onChange={(e: any) => setSortBy(e.target.value)}
+                  className="text-xs font-bold text-slate-700 border-none bg-slate-50 p-2 rounded-xl focus:ring-[#14B8A6]/20 cursor-pointer"
+                >
+                  <option value="success">Highest Success Score (Default)</option>
+                  <option value="match">Highest Match Score</option>
+                </select>
+              </div>
+
+              {/* Scheme Comparison Grid */}
+              <Card className="border border-[#0F172A]/5 p-6 bg-white shadow-premium rounded-2xl space-y-4 overflow-x-auto">
+                <SectionHeader title="Scheme Application Comparison" />
+                <table className="min-w-full text-xs text-left text-slate-500 font-medium">
+                  <thead className="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100 pb-2">
+                    <tr>
+                      <th className="py-2.5 pr-4">Scheme</th>
+                      <th className="py-2.5 px-4">Eligibility</th>
+                      <th className="py-2.5 px-4">Success Score</th>
+                      <th className="py-2.5 px-4">Estimated Benefit</th>
+                      <th className="py-2.5 px-4">Difficulty</th>
+                      <th className="py-2.5 pl-4">Completion</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {sortedMatches.map((s) => {
+                      const reqCount = s.required_documents?.length || 0;
+                      const diff = reqCount <= 1 ? "Easy" : reqCount <= 3 ? "Medium" : "Hard";
+                      const success = successScores[s._id] !== undefined ? `${successScores[s._id]}%` : "Loading...";
+                      const benefit = s.benefits?.[0] || "Non-monetary aid";
+                      const completion = successScores[s._id] >= 95 ? "Today" : successScores[s._id] >= 80 ? "2 Days" : "1 Week";
+
+                      return (
+                        <tr key={s._id} className="hover:bg-slate-50/50 transition">
+                          <td className="py-3 pr-4 font-bold text-[#0F172A]">{s.scheme_name}</td>
+                          <td className="py-3 px-4 font-extrabold text-[#14B8A6]">{s.score}%</td>
+                          <td className="py-3 px-4 font-extrabold text-indigo-600">{success}</td>
+                          <td className="py-3 px-4 truncate max-w-[120px]">{benefit}</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-0.5 rounded-sm font-extrabold text-[9px] uppercase ${
+                              diff === "Easy" ? "bg-green-50 text-green-600" : diff === "Medium" ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-600"
+                            }`}>
+                              {diff}
+                            </span>
+                          </td>
+                          <td className="py-3 pl-4 font-bold text-slate-700">{completion}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </Card>
+            </div>
+          )}
+
           {/* Matches List */}
           <div>
             {matches.length === 0 ? (
@@ -214,7 +309,7 @@ export default function Results() {
                     <Button onClick={() => navigate("/profile")}>
                       Edit Profile Wizard
                     </Button>
-                    <Button variant="secondary" onClick={() => navigate("/simulator")}>
+                    <Button variant="secondary" onClick={() => navigate("/eligibility-simulator")}>
                       Try Eligibility Simulator
                     </Button>
                   </div>
@@ -233,7 +328,7 @@ export default function Results() {
                 initial="initial"
                 animate="animate"
               >
-                {matches.map((scheme) => {
+                {sortedMatches.map((scheme) => {
                   const isSelected = selectedSchemes.some((s) => s._id === scheme._id);
                   const isLimitReached = selectedSchemes.length >= 2;
                   const canSelect = isSelected || !isLimitReached;
@@ -259,7 +354,21 @@ export default function Results() {
                               {scheme.scheme_name}
                             </h2>
                           </div>
-                          <CircularProgress score={scheme.score} variant={getScoreVariant(scheme.score)} />
+                          
+                          {/* Match & Success Gauges side-by-side */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex flex-col items-center">
+                              <span className="text-[8px] font-bold text-slate-400 uppercase mb-1">Match</span>
+                              <CircularProgress score={scheme.score} variant={getScoreVariant(scheme.score)} />
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <span className="text-[8px] font-bold text-slate-400 uppercase mb-1">Success</span>
+                              <CircularProgress
+                                score={successScores[scheme._id] ?? 0}
+                                variant={getScoreVariant(successScores[scheme._id] ?? 0)}
+                              />
+                            </div>
+                          </div>
                         </div>
 
                         {/* AI explanation of Why You Match */}
@@ -299,7 +408,7 @@ export default function Results() {
                           </label>
 
                           {/* Action buttons */}
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
                             <Button
                               variant="secondary"
                               size="sm"
@@ -310,6 +419,39 @@ export default function Results() {
                               }
                             >
                               Details
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() =>
+                                navigate(`/document-verification/${scheme._id}`, {
+                                  state: scheme,
+                                })
+                              }
+                            >
+                              Verify Docs
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() =>
+                                navigate(`/application-roadmap/${scheme._id}`, {
+                                  state: scheme,
+                                })
+                              }
+                            >
+                              Roadmap
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() =>
+                                navigate("/chat", {
+                                  state: scheme,
+                                })
+                              }
+                            >
+                              Ask AI
                             </Button>
                             <Button
                               size="sm"

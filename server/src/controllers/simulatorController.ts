@@ -1,15 +1,171 @@
 import { Request, Response } from "express";
 import { findMatchingSchemes } from "../services/matchingService";
+import {
+  generateWhySimulationChange,
+  generateSimulationSummaryText,
+} from "../services/aiExplanationService";
 
-export async function simulateEligibility(
-  req: Request,
-  res: Response
-) {
+function parseBenefitAmount(benefits: string[]): number {
+  if (!benefits || !Array.isArray(benefits)) return 0;
+  let maxMonetary = 0;
+  benefits.forEach((benefit) => {
+    const matches = benefit.match(/(?:₹|Rs\.?|INR)\s*([\d,]+)/gi);
+    if (matches) {
+      matches.forEach((m) => {
+        const numMatch = m.match(/[\d,]+/);
+        if (numMatch) {
+          const val = parseFloat(numMatch[0].replace(/,/g, ""));
+          if (!isNaN(val)) {
+            maxMonetary += val;
+          }
+        }
+      });
+    }
+  });
+  return maxMonetary;
+}
+
+function checkEligibilityDetail(profile: any, scheme: any) {
+  const userIncome = Number(profile.income || profile.annual_income || 0);
+  const userAge = Number(profile.age || 0);
+  const userState = (profile.state || "").trim();
+  const userOccupation = (profile.occupation || "").trim().toLowerCase();
+
+  const rules = scheme.eligibility_rules || {};
+  const reasons: string[] = [];
+
+  // 1. Age Filter
+  if (userAge > 0) {
+    const minAge = rules.min_age != null ? Number(rules.min_age) : 0;
+    const maxAge = rules.max_age != null ? Number(rules.max_age) : 120;
+    if (userAge < minAge || userAge > maxAge) {
+      reasons.push(`Age ${userAge} falls outside required ${minAge}-${maxAge} range`);
+    }
+  }
+
+  // 2. State Filter
+  if (userState && scheme.state_applicability && Array.isArray(scheme.state_applicability)) {
+    const states = scheme.state_applicability.map((s: string) => s.toLowerCase());
+    const isAll = states.includes("all") || states.includes("all india") || states.includes("pan india");
+    if (!isAll && !states.includes(userState.toLowerCase())) {
+      reasons.push(`State ${userState} is not eligible`);
+    }
+  }
+
+  // 3. Income Filter
+  if (rules.income_limit != null && userIncome > 0) {
+    const limit = Number(rules.income_limit);
+    if (limit > 0 && userIncome > limit) {
+      reasons.push(`Income ₹${userIncome.toLocaleString()} exceeds threshold of ₹${limit.toLocaleString()}`);
+    }
+  }
+
+  // 4. Occupation Filter
+  if (rules.occupation && typeof rules.occupation === "string") {
+    const ruleOcc = rules.occupation.toLowerCase();
+    if (ruleOcc !== "any" && ruleOcc !== "citizen" && userOccupation) {
+      const isDirectMatch = ruleOcc.includes(userOccupation) || userOccupation.includes(ruleOcc);
+      const isFarmerMatch =
+        userOccupation.includes("farmer") &&
+        (ruleOcc.includes("farm") || ruleOcc.includes("agri") || ruleOcc.includes("kisan") || ruleOcc.includes("crop") || ruleOcc.includes("pacs") || ruleOcc.includes("fpo"));
+      const isStudentMatch =
+        userOccupation.includes("student") &&
+        (ruleOcc.includes("student") || ruleOcc.includes("school") || ruleOcc.includes("scholarship") || ruleOcc.includes("child") || ruleOcc.includes("girl") || ruleOcc.includes("education") || ruleOcc.includes("youth"));
+      const isWomenMatch =
+        (userOccupation.includes("woman") || userOccupation.includes("women") || userOccupation.includes("homemaker")) &&
+        (ruleOcc.includes("woman") || ruleOcc.includes("women") || ruleOcc.includes("female") || ruleOcc.includes("girl") || ruleOcc.includes("mother") || ruleOcc.includes("lady") || ruleOcc.includes("shg") || ruleOcc.includes("self help"));
+      const isUnemployedMatch =
+        userOccupation.includes("unemployed") &&
+        (ruleOcc.includes("unemployed") || ruleOcc.includes("youth") || ruleOcc.includes("seeker"));
+      const isBusinessMatch =
+        (userOccupation.includes("business") || userOccupation.includes("self employed") || userOccupation.includes("private")) &&
+        (ruleOcc.includes("business") || ruleOcc.includes("entrepreneur") || ruleOcc.includes("msme") || ruleOcc.includes("self-employed") || ruleOcc.includes("trader") || ruleOcc.includes("artisan"));
+
+      if (!(isDirectMatch || isFarmerMatch || isStudentMatch || isWomenMatch || isUnemployedMatch || isBusinessMatch)) {
+        reasons.push(`Occupation is restricted to: ${rules.occupation}`);
+      }
+    }
+  }
+
+  return {
+    eligible: reasons.length === 0,
+    reasons,
+  };
+}
+
+function cloneAndSynthesizeProfile(p: any) {
+  if (!p) return {};
+  const cloned = { ...p };
+
+  // Collect raw text components for embedding searches
+  let occParts = [];
+  if (cloned.occupation) occParts.push(cloned.occupation.toLowerCase());
+  
+  if (cloned.farmer === true || cloned.farmer === "Yes" || String(cloned.farmer).toLowerCase() === "true") {
+    occParts.push("farmer");
+  }
+  if (cloned.student === true || cloned.student === "Yes" || String(cloned.student).toLowerCase() === "true") {
+    occParts.push("student");
+  }
+  if (cloned.businessOwner === true || cloned.businessOwner === "Yes" || String(cloned.businessOwner).toLowerCase() === "true" || cloned.business_owner === true) {
+    occParts.push("business owner");
+    occParts.push("self employed");
+  }
+  if (cloned.employmentStatus === "Unemployed" || cloned.employment_status === "Unemployed" || String(cloned.occupation).toLowerCase() === "unemployed") {
+    occParts.push("unemployed");
+  }
+  if (cloned.gender === "Female" || String(cloned.occupation).toLowerCase() === "woman" || String(cloned.occupation).toLowerCase() === "homemaker") {
+    occParts.push("woman");
+    occParts.push("homemaker");
+  }
+
+  if (occParts.length > 0) {
+    cloned.occupation = Array.from(new Set(occParts)).join(", ");
+  }
+
+  // Generate synthesized rawText to feed vector searches
+  cloned.rawText = `Citizen situation: A ${cloned.age || 25} year old ${cloned.gender || "individual"} residing in ${cloned.state || "Delhi"}.
+Occupation status details: ${cloned.occupation || "General citizen"}.
+Household annual income is ₹${cloned.income || 0}.
+Education background is ${cloned.education || "Undergraduate"}.
+Marital status: ${cloned.maritalStatus || cloned.marital_status || "Single"}.
+Dependents count: ${cloned.children || cloned.numberOfChildren || 0} children.
+Disability indicator: ${cloned.disability || "No"}.
+Farmer status: ${cloned.farmer ? "Yes" : "No"}.
+Student status: ${cloned.student ? "Yes" : "No"}.
+Business owner status: ${cloned.businessOwner ? "Yes" : "No"}.`;
+
+  return cloned;
+}
+
+export async function simulateEligibility(req: Request, res: Response) {
   try {
-    const { originalProfile, simulatedProfile } = req.body;
+    const { originalProfile, simulatedProfile, simulationChanges } = req.body;
 
-    const originalMatches = await findMatchingSchemes(originalProfile);
-    const simulatedMatches = await findMatchingSchemes(simulatedProfile);
+    if (!originalProfile) {
+      return res.status(400).json({
+        success: false,
+        message: "originalProfile is required",
+      });
+    }
+
+    // Merge changes if simulationChanges provided
+    let targetSimulated = simulatedProfile;
+    if (simulationChanges && !targetSimulated) {
+      targetSimulated = { ...originalProfile, ...simulationChanges };
+    }
+
+    if (!targetSimulated) {
+      targetSimulated = { ...originalProfile };
+    }
+
+    // Clone and Synthesize virtual profiles (completely in-memory)
+    const virtualOriginal = cloneAndSynthesizeProfile(originalProfile);
+    const virtualSimulated = cloneAndSynthesizeProfile(targetSimulated);
+
+    // Pass simulated and original profiles through existing matching engine
+    const originalMatches = await findMatchingSchemes(virtualOriginal);
+    const simulatedMatches = await findMatchingSchemes(virtualSimulated);
 
     const originalIds = new Set(
       originalMatches.map((s: any) => String(s._id))
@@ -19,11 +175,12 @@ export async function simulateEligibility(
       simulatedMatches.map((s: any) => String(s._id))
     );
 
-    const gained = simulatedMatches.filter(
+    // Segregate schemes
+    const rawGained = simulatedMatches.filter(
       (s: any) => !originalIds.has(String(s._id))
     );
 
-    const lost = originalMatches.filter(
+    const rawLost = originalMatches.filter(
       (s: any) => !simulatedIds.has(String(s._id))
     );
 
@@ -31,15 +188,127 @@ export async function simulateEligibility(
       (s: any) => originalIds.has(String(s._id))
     );
 
+    // 1. Calculate structural reasons and call RAG AI Explanations in parallel for gained schemes
+    const gained = await Promise.all(
+      rawGained.map(async (scheme: any) => {
+        const check = checkEligibilityDetail(virtualOriginal, scheme);
+        const reason = check.reasons.length > 0
+          ? `Because your previous parameters did not match: ${check.reasons.join(", ")}`
+          : "You qualify under new criteria parameters.";
+
+        // Use the existing Explainability pipeline (Gemini) to explain what changed
+        let aiExplanation = "";
+        try {
+          aiExplanation = await generateWhySimulationChange(
+            virtualOriginal,
+            virtualSimulated,
+            scheme
+          );
+        } catch (e) {
+          console.error(`AI explanation failed for gained scheme ${scheme._id}:`, e);
+          aiExplanation = `Earlier demographic constraints prevented eligibility. Under your simulated profile changes, you now satisfy all parameters.`;
+        }
+
+        return {
+          ...scheme.toObject ? scheme.toObject() : scheme,
+          reason,
+          aiExplanation,
+        };
+      })
+    );
+
+    // 2. Calculate structural reasons for lost schemes
+    const lost = rawLost.map((scheme: any) => {
+      const check = checkEligibilityDetail(virtualSimulated, scheme);
+      const reason = check.reasons.length > 0
+        ? check.reasons.join(", ")
+        : "Shifted demographic constraints";
+
+      return {
+        ...scheme.toObject ? scheme.toObject() : scheme,
+        reason,
+      };
+    });
+
+    // 3. Compile Summary Insights
+    let summaryText = "";
+    let largestBenefit = null;
+    let mostImportantScheme = "";
+    let suggestedDocuments: string[] = [];
+    let nextAction = "";
+
+    if (gained.length > 0) {
+      // Aggregate monetary benefits
+      let totalMonetary = 0;
+      let maxMonetary = -1;
+
+      gained.forEach((s: any) => {
+        const val = parseBenefitAmount(s.benefits || []);
+        totalMonetary += val;
+        
+        if (val > maxMonetary) {
+          maxMonetary = val;
+          largestBenefit = {
+            schemeName: s.scheme_name,
+            amount: val,
+            benefitText: s.benefits?.[0] || "",
+          };
+        }
+
+        // Collect documents
+        if (s.required_documents && Array.isArray(s.required_documents)) {
+          s.required_documents.forEach((doc: string) => {
+            suggestedDocuments.push(doc);
+          });
+        }
+      });
+
+      suggestedDocuments = Array.from(new Set(suggestedDocuments)).filter(Boolean);
+
+      // Sort gained by score to find most important scheme
+      const sortedGained = [...gained].sort(
+        (a: any, b: any) => (b.score || 0) - (a.score || 0)
+      );
+      mostImportantScheme = sortedGained[0]?.scheme_name || "";
+
+      // Generate the AI summary text
+      try {
+        summaryText = await generateSimulationSummaryText(
+          virtualOriginal,
+          virtualSimulated,
+          gained.length,
+          totalMonetary,
+          gained
+        );
+      } catch (e) {
+        summaryText = `If this life event happens, you become eligible for ${gained.length} additional schemes worth approximately ₹${totalMonetary.toLocaleString()} in combined benefits.`;
+      }
+
+      // Format next actions
+      const docPreview = suggestedDocuments.slice(0, 2).join(" & ");
+      nextAction = `Prepare applications for ${mostImportantScheme}. Verify that you have your ${
+        docPreview || "Aadhaar Card"
+      } ready.`;
+    } else {
+      summaryText = "No new schemes qualified under these simulated changes. Your current benefits remain stable.";
+      nextAction = "Try adjusting other parameters like household income thresholds or age increments to explore options.";
+    }
+
     res.json({
       success: true,
       gained,
       lost,
       unchanged,
+      summary: {
+        summaryText,
+        largestBenefit,
+        mostImportantScheme,
+        suggestedDocuments,
+        nextAction,
+      },
     });
   } catch (err: any) {
-    console.error(err);
-
+    console.error("Simulation Controller Error:", err);
     res.status(500).json({
       success: false,
       message: err.message || "Simulation failed",

@@ -58,7 +58,7 @@ export default function Footer() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F172A]/50">Actions</h3>
             <ul className="space-y-3 text-sm font-semibold text-[#0F172A]/80">
               <li>
-                <Link to="/simulator" className="group flex items-center gap-1.5 hover:text-[#14B8A6] transition">
+                <Link to="/eligibility-simulator" className="group flex items-center gap-1.5 hover:text-[#14B8A6] transition">
                   Check eligibility <FaArrowRight className="h-3 w-3 text-slate-400 group-hover:text-[#14B8A6] transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </li>

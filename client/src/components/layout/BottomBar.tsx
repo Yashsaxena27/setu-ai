@@ -8,7 +8,7 @@ export default function BottomBar() {
     { path: "/", label: "Home", icon: FaHome },
     { path: "/dashboard", label: "Dashboard", icon: FaFolder },
     { path: "/profile", label: "Profile", icon: FaUser },
-    { path: "/simulator", label: "Simulator", icon: FaSlidersH },
+    { path: "/eligibility-simulator", label: "Simulator", icon: FaSlidersH },
   ];
 
   return (

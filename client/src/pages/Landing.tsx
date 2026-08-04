@@ -273,7 +273,7 @@ export default function Landing() {
                       Simulate major life events—like changes in jobs, income, or graduation status—to see scheme adjustments.
                     </p>
                   </div>
-                  <Button onClick={() => navigate("/simulator")} variant="ghost" size="sm" className="w-full justify-start p-0">
+                  <Button onClick={() => navigate("/eligibility-simulator")} variant="ghost" size="sm" className="w-full justify-start p-0">
                     Run Simulation →
                   </Button>
                 </Card>

@@ -8,6 +8,7 @@ import WhatsAppWidget from "../components/widgets/WhatsAppWidget";
 import CommandPalette from "../components/ui/CommandPalette";
 
 import EligibilitySimulator from "../pages/EligibilitySimulator";
+import DocumentVerification from "../pages/DocumentVerification";
 import Landing from "../pages/Landing";
 import Consent from "../pages/Consent";
 import Profile from "../pages/Profile";
@@ -17,6 +18,11 @@ import ApplicationDraft from "../pages/ApplicationDraft";
 import Reminders from "../pages/Reminders";
 import Settings from "../pages/Settings";
 import NotFound from "../pages/NotFound";
+import ApplicationRoadmap from "../pages/ApplicationRoadmap";
+import SchemeUpdates from "../pages/SchemeUpdates";
+import Family from "../pages/Family";
+import Chat from "../pages/Chat";
+import AdminPortal from "../pages/AdminPortal";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
@@ -61,6 +67,7 @@ function AnimatedRoutes() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/simulator" element={<EligibilitySimulator />} />
+            <Route path="/eligibility-simulator" element={<EligibilitySimulator />} />
 
             <Route element={<ProtectedRoute />}>
               <Route path="/consent" element={<Consent />} />
@@ -72,6 +79,14 @@ function AnimatedRoutes() {
               <Route path="/compare" element={<CompareSchemes />} />
               <Route path="/reminders" element={<Reminders />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/document-verification" element={<DocumentVerification />} />
+              <Route path="/document-verification/:schemeId" element={<DocumentVerification />} />
+              <Route path="/application-roadmap" element={<ApplicationRoadmap />} />
+              <Route path="/application-roadmap/:schemeId" element={<ApplicationRoadmap />} />
+              <Route path="/scheme-updates" element={<SchemeUpdates />} />
+              <Route path="/family" element={<Family />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/admin" element={<AdminPortal />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

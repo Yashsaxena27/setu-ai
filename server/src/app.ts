@@ -15,6 +15,14 @@ import vectorRoutes from "./routes/vectorRoutes";
 import explainRoutes from "./routes/explain";
 import whatsappRoutes from "./routes/whatsapp";
 import simulatorRoutes from "./routes/simulator";
+import documentRoutes from "./routes/documents";
+import applicationScoreRoutes from "./routes/applicationScore";
+import applicationRoadmapRoutes from "./routes/applicationRoadmap";
+import schemeUpdatesRoutes from "./routes/schemeUpdates";
+import familyRoutes from "./routes/family";
+import chatRoutes from "./routes/chat";
+import digiLockerRoutes from "./routes/digiLocker";
+import adminRoutes from "./routes/admin";
 
 dotenv.config();
 
@@ -49,4 +57,12 @@ app.use("/vector-search", vectorRoutes);
 app.use("/explain", explainRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/simulator", simulatorRoutes);
+app.use("/documents", documentRoutes);
+app.use("/application-score", applicationScoreRoutes);
+app.use("/application-roadmap", applicationRoadmapRoutes);
+app.use("/scheme-updates", schemeUpdatesRoutes);
+app.use("/family", familyRoutes);
+app.use("/chat", chatRoutes);
+app.use("/digilocker", digiLockerRoutes);
+app.use("/admin", adminRoutes);
 export default app;

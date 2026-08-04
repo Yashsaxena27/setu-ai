@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaUserEdit, FaSearch, FaSlidersH, FaFileAlt } from "react-icons/fa";
+import { FaUserEdit, FaSearch, FaSlidersH, FaFileAlt, FaBullhorn, FaUsers, FaRobot, FaShieldAlt } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -15,6 +15,8 @@ import SectionHeader from "../components/ui/SectionHeader";
 import Timeline from "../components/ui/Timeline";
 import EmptyState from "../components/ui/EmptyState";
 import Reveal from "../components/effects/Reveal";
+import { getApplicationScore } from "../services/applicationScoreApi";
+import { getProfile } from "../services/profileApi";
 
 interface DraftItem {
   id: string;
@@ -43,6 +45,20 @@ export default function Dashboard() {
 
   const [recentDrafts, setRecentDrafts] = useState<DraftItem[]>([]);
   const [recentMatches, setRecentMatches] = useState<MatchItem[]>([]);
+  const [successScores, setSuccessScores] = useState<Record<string, number>>({});
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function checkRole() {
+      try {
+        const p = await getProfile();
+        if (p && ["Moderator", "Scheme Editor", "District Admin", "State Admin", "Super Admin"].includes(p.role || "")) {
+          setIsAdmin(true);
+        }
+      } catch {}
+    }
+    checkRole();
+  }, []);
 
   useEffect(() => {
     const matches: MatchItem[] = JSON.parse(
@@ -67,6 +83,25 @@ export default function Dashboard() {
     });
   }, []);
 
+  useEffect(() => {
+    if (recentMatches.length === 0) return;
+    const fetchScores = async () => {
+      const map: Record<string, number> = {};
+      await Promise.all(
+        recentMatches.map(async (s) => {
+          try {
+            const res = await getApplicationScore(s._id);
+            map[s._id] = res.score.overall_score;
+          } catch (e) {
+            map[s._id] = 50;
+          }
+        })
+      );
+      setSuccessScores(map);
+    };
+    fetchScores();
+  }, [recentMatches]);
+
   const activityItems = [
     { title: "Profile Checked", description: "Your eligibility data is up to date.", date: "Today", completed: true },
     { title: "AI RAG Matcher Ready", description: "Matched against current federal guidelines.", date: "Latest", completed: true },
@@ -78,7 +113,13 @@ export default function Dashboard() {
     { label: "Overview", active: true, onClick: () => navigate("/dashboard") },
     { label: "Profile Wizard", active: false, onClick: () => navigate("/profile") },
     { label: "Matches Results", active: false, onClick: () => navigate("/results") },
-    { label: "Simulator Panel", active: false, onClick: () => navigate("/simulator") },
+    { label: "Simulator Panel", active: false, onClick: () => navigate("/eligibility-simulator") },
+    { label: "Document Verification", active: false, onClick: () => navigate("/document-verification") },
+    { label: "Application Roadmap", active: false, onClick: () => navigate("/application-roadmap") },
+    { label: "Scheme Tracker", active: false, onClick: () => navigate("/scheme-updates") },
+    { label: "Family Household", active: false, onClick: () => navigate("/family") },
+    { label: "AI Copilot", active: false, onClick: () => navigate("/chat") },
+    ...(isAdmin ? [{ label: "Admin Console", active: false, onClick: () => navigate("/admin") }] : []),
     { label: "Account Settings", active: false, onClick: () => navigate("/settings") },
   ];
 
@@ -194,13 +235,63 @@ export default function Dashboard() {
                     <FaSearch />
                   </Button>
                   <Button
-                    onClick={() => navigate("/simulator")}
+                    onClick={() => navigate("/eligibility-simulator")}
                     variant="secondary"
                     className="w-full justify-between"
                   >
                     <span>Eligibility Simulator</span>
                     <FaSlidersH />
                   </Button>
+                  <Button
+                    onClick={() => navigate("/document-verification")}
+                    variant="secondary"
+                    className="w-full justify-between"
+                  >
+                    <span>Document Verification</span>
+                    <FaFileAlt />
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/application-roadmap")}
+                    variant="secondary"
+                    className="w-full justify-between"
+                  >
+                    <span>Application Roadmap</span>
+                    <FaSlidersH />
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/scheme-updates")}
+                    variant="secondary"
+                    className="w-full justify-between"
+                  >
+                    <span>Scheme Change Tracker</span>
+                    <FaBullhorn />
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/family")}
+                    variant="secondary"
+                    className="w-full justify-between"
+                  >
+                    <span>Family Household</span>
+                    <FaUsers />
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/chat")}
+                    variant="secondary"
+                    className="w-full justify-between"
+                  >
+                    <span>AI Copilot</span>
+                    <FaRobot />
+                  </Button>
+                  {isAdmin && (
+                    <Button
+                      onClick={() => navigate("/admin")}
+                      variant="primary"
+                      className="w-full justify-between bg-slate-900 border-none text-[#14B8A6]"
+                    >
+                      <span>Admin Console</span>
+                      <FaShieldAlt />
+                    </Button>
+                  )}
                 </div>
               </Card>
             </div>
@@ -232,9 +323,14 @@ export default function Dashboard() {
                           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                             {scheme.category}
                           </span>
-                          <span className="text-xs font-bold text-[#22C55E]">
-                            {scheme.score}% Match
-                          </span>
+                          <div className="flex gap-2">
+                            <span className="text-[10px] font-bold text-[#22C55E] bg-green-50 px-2 py-0.5 rounded-sm">
+                              {scheme.score}% Match
+                            </span>
+                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-sm">
+                              {successScores[scheme._id] !== undefined ? `${successScores[scheme._id]}% Success` : "Loading..."}
+                            </span>
+                          </div>
                         </div>
                         <h4 className="font-serif text-lg font-bold text-[#0F172A] line-clamp-1">
                           {scheme.scheme_name}

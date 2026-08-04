@@ -28,7 +28,23 @@ const schemeSchema = new mongoose.Schema(
 
     embedding: [Number],
 
-    version_history: [String],
+    version_history: [
+      {
+        version_number: String,
+        date: { type: Date, default: Date.now },
+        change_type: String,
+        modified_fields: [
+          {
+            field_name: String,
+            previous_value: String,
+            new_value: String,
+          }
+        ],
+        reason: String,
+        verified_source: String,
+        verified_by: String,
+      }
+    ],
 
     tags: [String],
   },

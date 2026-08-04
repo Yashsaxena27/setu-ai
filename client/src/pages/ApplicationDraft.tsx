@@ -12,6 +12,8 @@ import { BridgeIcon } from "../components/ui/BridgeLogo";
 import Badge from "../components/ui/Badge";
 import Skeleton from "../components/ui/Skeleton";
 import Reveal from "../components/effects/Reveal";
+import { getApplicationScore } from "../services/applicationScoreApi";
+import SuccessScoreCard from "../components/ui/SuccessScoreCard";
 
 import {
   FaFileAlt,
@@ -51,6 +53,27 @@ export default function ApplicationDraft() {
   const [draft, setDraft] = useState(GENERATING_TEXT);
   const [isGenerating, setIsGenerating] = useState(true);
   const [requiredDocuments, setRequiredDocuments] = useState<string[]>([]);
+
+  // Success score states
+  const [successScoreData, setSuccessScoreData] = useState<any>(null);
+  const [loadingScore, setLoadingScore] = useState(false);
+
+  const fetchSuccessScore = async () => {
+    if (!scheme?._id) return;
+    setLoadingScore(true);
+    try {
+      const res = await getApplicationScore(scheme._id);
+      setSuccessScoreData(res.score);
+    } catch (e) {
+      console.error("Failed to load success score", e);
+    } finally {
+      setLoadingScore(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSuccessScore();
+  }, [scheme?._id]);
 
   useEffect(() => {
     if (!scheme) return;
@@ -221,6 +244,12 @@ ${scheme?.official_link || "Not available"}
             </div>
           </Reveal>
 
+          {loadingScore ? (
+            <Skeleton className="h-48 w-full rounded-3xl" />
+          ) : successScoreData ? (
+            <SuccessScoreCard scoreData={successScoreData} onRefresh={fetchSuccessScore} />
+          ) : null}
+
           {/* Docs style Sheet */}
           <div
             ref={pdfRef}
@@ -279,16 +308,27 @@ ${scheme?.official_link || "Not available"}
               ) : requiredDocuments.length === 0 ? (
                 <p className="text-sm text-slate-400 font-semibold">No mandatory documents listed for this draft.</p>
               ) : (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {requiredDocuments.map((doc, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 bg-[#FAF8F3] px-5 py-4 border border-[#0F172A]/5 rounded-xl shadow-soft"
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {requiredDocuments.map((doc, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 bg-[#FAF8F3] px-5 py-4 border border-[#0F172A]/5 rounded-xl shadow-soft"
+                      >
+                        <FaCheckCircle className="text-[#22C55E] shrink-0" />
+                        <span className="text-xs font-semibold text-[#0F172A]">{doc}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pt-2 flex justify-center">
+                    <Button
+                      variant="accent"
+                      onClick={() => navigate(`/document-verification/${scheme._id}`, { state: scheme })}
+                      className="w-full"
                     >
-                      <FaCheckCircle className="text-[#22C55E] shrink-0" />
-                      <span className="text-xs font-semibold text-[#0F172A]">{doc}</span>
-                    </div>
-                  ))}
+                      Analyze Document Readiness with AI
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -326,6 +366,15 @@ ${scheme?.official_link || "Not available"}
           >
             <FaShareAlt />
             <span className="hidden sm:inline">Share</span>
+          </button>
+
+          <button
+            onClick={() => navigate(`/application-roadmap/${scheme._id}`, { state: scheme })}
+            disabled={isGenerating}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-[#14B8A6] hover:text-white hover:bg-white/10 transition duration-150 cursor-pointer disabled:opacity-50"
+          >
+            <FaExchangeAlt />
+            <span className="hidden sm:inline">Roadmap</span>
           </button>
 
           {officialLinkEnabled && (

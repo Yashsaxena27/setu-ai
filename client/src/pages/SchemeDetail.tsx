@@ -2,6 +2,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { getExplanation } from "../services/explain";
+import { getApplicationScore } from "../services/applicationScoreApi";
 import { FaArrowLeft, FaCheckCircle, FaInfoCircle, FaFileContract } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
@@ -15,6 +16,7 @@ import Tabs from "../components/ui/Tabs";
 import SectionHeader from "../components/ui/SectionHeader";
 import Skeleton from "../components/ui/Skeleton";
 import Reveal from "../components/effects/Reveal";
+import SuccessScoreCard from "../components/ui/SuccessScoreCard";
 
 export default function SchemeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +39,27 @@ export default function SchemeDetail() {
   const [activeTab, setActiveTab] = useState("overview");
   const [reasons, setReasons] = useState<string[]>([]);
   const [loadingReason, setLoadingReason] = useState(true);
+
+  // Success score states
+  const [successScoreData, setSuccessScoreData] = useState<any>(null);
+  const [loadingScore, setLoadingScore] = useState(false);
+
+  const fetchSuccessScore = async () => {
+    if (!scheme?._id) return;
+    setLoadingScore(true);
+    try {
+      const res = await getApplicationScore(scheme._id);
+      setSuccessScoreData(res.score);
+    } catch (e) {
+      console.error("Failed to load success score", e);
+    } finally {
+      setLoadingScore(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSuccessScore();
+  }, [scheme?._id]);
 
   useEffect(() => {
     if (!scheme) return;
@@ -229,14 +252,25 @@ export default function SchemeDetail() {
               <div className="space-y-6">
                 <SectionHeader title="Required Documentation Checklist" />
                 {scheme.required_documents && scheme.required_documents.length > 0 ? (
-                  <ul className="space-y-3">
-                    {scheme.required_documents.map((item: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                        <FaFileContract className="text-[#14B8A6] shrink-0 mt-0.5 h-4 w-4" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="space-y-6">
+                    <ul className="space-y-3">
+                      {scheme.required_documents.map((item: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                          <FaFileContract className="text-[#14B8A6] shrink-0 mt-0.5 h-4 w-4" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="pt-4 border-t border-slate-100">
+                      <Button
+                        variant="accent"
+                        onClick={() => navigate(`/document-verification/${scheme._id}`, { state: scheme })}
+                        className="w-full"
+                      >
+                        Verify Uploaded Documents with AI
+                      </Button>
+                    </div>
+                  </div>
                 ) : (
                   <p className="text-sm text-slate-400 font-medium">No documents required.</p>
                 )}
@@ -267,22 +301,75 @@ export default function SchemeDetail() {
             )}
 
           </Card>
+          {loadingScore ? (
+            <Card className="p-6 bg-white border border-slate-100 animate-pulse h-48" />
+          ) : successScoreData ? (
+            <SuccessScoreCard scoreData={successScoreData} onRefresh={fetchSuccessScore} />
+          ) : null}
+
+          {scheme.version_history && scheme.version_history.length > 0 && (
+            <Card className="border border-slate-100 p-6 bg-white shadow-soft rounded-3xl space-y-4">
+              <SectionHeader title="Scheme Version History" />
+              
+              <div className="relative pl-6 border-l border-slate-100 ml-4 space-y-6">
+                {scheme.version_history.map((ver: any, idx: number) => (
+                  <div key={idx} className="relative space-y-1">
+                    <div className="absolute -left-[35px] top-0 h-6 w-6 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                      v{ver.version_number}
+                    </div>
+                    
+                    <div className="pl-3 text-xs font-semibold text-slate-600">
+                      <div className="flex justify-between items-center gap-4">
+                        <span className="font-extrabold text-[#0F172A]">{ver.change_type}</span>
+                        <span className="text-slate-400 text-[10px]">{new Date(ver.date).toLocaleDateString()}</span>
+                      </div>
+                      <p className="text-slate-500 font-medium mt-1">{ver.reason}</p>
+                      
+                      {ver.modified_fields && ver.modified_fields.length > 0 && (
+                        <ul className="mt-1.5 space-y-1 text-slate-400 font-medium">
+                          {ver.modified_fields.map((f: any, i: number) => (
+                            <li key={i} className="flex items-center gap-1.5">
+                              <span className="text-slate-300">•</span>
+                              {f.field_name}: <span className="line-through">{f.previous_value}</span> ➜ <strong>{f.new_value}</strong>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* Visit Portal Action */}
-          {scheme.official_link && (
-            <div className="flex justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              className="w-full"
+              onClick={() => navigate(`/application-roadmap/${scheme._id}`, { state: scheme })}
+            >
+              Start Personalized Application Roadmap
+            </Button>
+            <Button
+              className="w-full"
+              variant="secondary"
+              onClick={() => navigate("/chat", { state: scheme })}
+            >
+              Ask AI Copilot
+            </Button>
+            {scheme.official_link && (
               <a
                 href={scheme.official_link}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full"
               >
-                <Button className="w-full">
+                <Button variant="secondary" className="w-full">
                   Visit Official Government Application Portal
                 </Button>
               </a>
-            </div>
-          )}
+            )}
+          </div>
 
         </div>
       </PageContainer>

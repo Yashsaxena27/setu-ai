@@ -14,7 +14,7 @@ const COMMAND_OPTIONS: NavOption[] = [
   { label: "Home / Overview", path: "/", category: "Navigation", icon: FaHome },
   { label: "Citizen Dashboard", path: "/dashboard", category: "Portal", icon: FaUser },
   { label: "Profile Wizard", path: "/profile", category: "Setup", icon: FaUser },
-  { label: "Eligibility Simulator", path: "/simulator", category: "Sandbox", icon: FaSlidersH },
+  { label: "Eligibility Simulator", path: "/eligibility-simulator", category: "Sandbox", icon: FaSlidersH },
   { label: "Compare Schemes", path: "/compare", category: "Analysis", icon: FaExchangeAlt },
   { label: "Application Reminders", path: "/reminders", category: "Tracking", icon: FaBell },
   { label: "Account Settings", path: "/settings", category: "Preferences", icon: FaCog },

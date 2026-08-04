@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export async function api<T>(
   endpoint: string,
@@ -6,20 +6,24 @@ export async function api<T>(
 ): Promise<T> {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && {
-        Authorization: `Bearer ${token}`,
-      }),
-      ...(options?.headers || {}),
-    },
-    ...options,
-  });
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+        ...(options?.headers || {}),
+      },
+      ...options,
+    });
 
-  if (!response.ok) {
-    throw new Error("Something went wrong");
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    throw new Error(err?.message || "Network request failed");
   }
-
-  return response.json();
 }
