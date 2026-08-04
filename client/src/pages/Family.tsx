@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -9,10 +9,6 @@ import {
   FaUserPlus,
   FaTrash,
   FaEdit,
-  FaFileInvoiceDollar,
-  FaClipboardList,
-  FaRoute,
-  FaUsers,
   FaRobot,
   FaCopy,
   FaDownload,
@@ -29,6 +25,7 @@ import Badge from "../components/ui/Badge";
 import SectionHeader from "../components/ui/SectionHeader";
 import Select from "../components/ui/Select";
 import Input from "../components/ui/Input";
+import EmptyState from "../components/ui/EmptyState";
 import {
   getFamilyProfile,
   addFamilyMember,
@@ -42,7 +39,6 @@ import {
 
 export default function Family() {
   const navigate = useNavigate();
-  const pdfRef = useRef<HTMLDivElement>(null);
 
   // States
   const [members, setMembers] = useState<FamilyMemberRecord[]>([]);
@@ -489,7 +485,7 @@ export default function Family() {
                 <h3 className="font-serif text-lg font-bold text-[#0F172A]">
                   {editingId ? "Edit Family Member" : "Add Family Member"}
                 </h3>
-                <Button size="xs" variant="secondary" onClick={handleCopyUserProfile}>
+                <Button size="sm" variant="secondary" onClick={handleCopyUserProfile}>
                   Copy User Profile Settings
                 </Button>
               </div>

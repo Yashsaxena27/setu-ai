@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
@@ -12,7 +12,6 @@ import {
   FaArrowDown,
   FaArrowUp,
   FaArrowLeft,
-  FaTimesCircle,
   FaInfoCircle,
   FaPlus,
   FaMinus,
@@ -22,12 +21,11 @@ import {
   FaRing,
   FaBaby,
   FaTractor,
-  FaCheckCircle,
   FaUserCircle,
 } from "react-icons/fa";
 
 import { simulateEligibility } from "../services/simulatorApi";
-import { getProfile, type Profile } from "../services/profileApi";
+import { getProfile } from "../services/profileApi";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import BottomBar from "../components/layout/BottomBar";
@@ -35,7 +33,6 @@ import PageContainer from "../components/layout/PageContainer";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
-import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import SectionHeader from "../components/ui/SectionHeader";
 import EmptyState from "../components/ui/EmptyState";

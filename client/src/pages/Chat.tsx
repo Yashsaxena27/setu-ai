@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -11,16 +10,9 @@ import {
   FaVolumeUp,
   FaPaperPlane,
   FaRobot,
-  FaPin,
   FaTrash,
   FaCopy,
-  FaShareAlt,
-  FaDownload,
-  FaWhatsapp,
-  FaSearch,
-  FaCheckCircle,
   FaExternalLinkAlt,
-  FaUserCheck,
 } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
@@ -30,8 +22,8 @@ import PageContainer from "../components/layout/PageContainer";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
-import Input from "../components/ui/Input";
 import SectionHeader from "../components/ui/SectionHeader";
+import EmptyState from "../components/ui/EmptyState";
 import {
   getChatSessions,
   getChatMessages,
@@ -52,7 +44,7 @@ export default function Chat() {
   const [sessions, setSessions] = useState<ChatSessionRecord[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessageRecord[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -286,7 +278,7 @@ export default function Chat() {
                   </div>
                 )}
 
-                <Button variant="secondary" size="xs" onClick={() => setActiveSessionId("")} className="w-full">
+                <Button variant="secondary" size="sm" onClick={() => setActiveSessionId("")} className="w-full">
                   + Start New Chat
                 </Button>
               </Card>

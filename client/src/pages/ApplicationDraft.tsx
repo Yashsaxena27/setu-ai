@@ -23,6 +23,7 @@ import {
   FaExternalLinkAlt,
   FaDownload,
   FaArrowLeft,
+  FaExchangeAlt,
 } from "react-icons/fa";
 
 import toast from "react-hot-toast";

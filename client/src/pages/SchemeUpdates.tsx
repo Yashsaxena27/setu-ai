@@ -1,21 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import {
   FaArrowLeft,
   FaSearch,
-  FaFileInvoiceDollar,
-  FaFileAlt,
-  FaCalendarCheck,
-  FaShieldAlt,
-  FaClock,
   FaPlay,
   FaCopy,
   FaShareAlt,
   FaExternalLinkAlt,
   FaUserCheck,
-  FaBullhorn,
 } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
@@ -25,7 +19,7 @@ import PageContainer from "../components/layout/PageContainer";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
-import SectionHeader from "../components/ui/SectionHeader";
+import EmptyState from "../components/ui/EmptyState";
 import {
   getUpdatesFeed,
   getMyImpact,
@@ -343,14 +337,14 @@ export default function SchemeUpdates() {
                       
                       <div className="flex gap-2">
                         <Button
-                          size="xs"
+                          size="sm"
                           variant="secondary"
                           onClick={() => navigate(`/scheme/${update.scheme_id}`)}
                         >
                           View Scheme Detail
                         </Button>
                         <Button
-                          size="xs"
+                          size="sm"
                           onClick={() => navigate(`/application-roadmap/${update.scheme_id}`)}
                         >
                           Launch Roadmap

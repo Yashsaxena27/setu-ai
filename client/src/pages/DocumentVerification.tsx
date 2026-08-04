@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -15,7 +14,6 @@ import {
   FaDownload,
   FaShareAlt,
   FaCopy,
-  FaUndo,
   FaHistory,
 } from "react-icons/fa";
 
@@ -57,44 +55,6 @@ const DOCUMENT_TYPES = [
   "Passport",
   "Any Government Certificate",
 ];
-
-function CircularProgress({ score }: { score: number }) {
-  const radius = 36;
-  const strokeWidth = 6;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-
-  const getColor = () => {
-    if (score >= 80) return "stroke-[#22C55E]";
-    if (score >= 50) return "stroke-[#F59E0B]";
-    return "stroke-[#EF4444]";
-  };
-
-  return (
-    <div className="relative h-24 w-24 flex items-center justify-center bg-white rounded-full shadow-soft border border-slate-100">
-      <svg className="w-full h-full transform -rotate-90">
-        <circle
-          cx="48"
-          cy="48"
-          r={radius}
-          className="stroke-slate-100 fill-transparent"
-          strokeWidth={strokeWidth}
-        />
-        <circle
-          cx="48"
-          cy="48"
-          r={radius}
-          className={`${getColor()} fill-transparent transition-all duration-1000 ease-out`}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-        />
-      </svg>
-      <span className="absolute text-lg font-black text-[#0F172A]">{score}%</span>
-    </div>
-  );
-}
 
 export default function DocumentVerification() {
   const { schemeId: urlSchemeId } = useParams<{ schemeId: string }>();
@@ -373,7 +333,7 @@ export default function DocumentVerification() {
     txt += `Success Probability: ${readiness.probability}\n`;
     txt += `AI Verdict: ${readiness.explanation}\n\n`;
     txt += `Recommendations:\n`;
-    readiness.recommendations.forEach((r, i) => {
+    readiness.recommendations.forEach((r) => {
       txt += `- ${r}\n`;
     });
     navigator.clipboard.writeText(txt);

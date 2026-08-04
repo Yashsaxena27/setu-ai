@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Badge from "./Badge";
 import {
   FaChevronDown,
   FaChevronUp,
   FaRobot,
-  FaCheckCircle,
   FaExclamationTriangle,
   FaRegFileAlt,
   FaListOl,
@@ -32,7 +32,7 @@ export default function SuccessScoreCard({ scoreData, onRefresh }: Props) {
     setSimulatedScore(scoreData.overall_score);
   }, [scoreData.overall_score]);
 
-  const handleSimulateChange = (recId: string, isChecked: boolean, scoreIncrease: number) => {
+  const handleSimulateChange = (recId: string, isChecked: boolean) => {
     setCheckedSimulations((prev) => {
       const next = { ...prev, [recId]: isChecked };
       
@@ -126,12 +126,23 @@ export default function SuccessScoreCard({ scoreData, onRefresh }: Props) {
           </div>
         </div>
 
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-slate-400 hover:text-[#14B8A6] p-2 hover:bg-slate-50 rounded-xl transition cursor-pointer"
-        >
-          {expanded ? <FaChevronUp size={16} /> : <FaChevronDown size={16} />}
-        </button>
+        <div className="flex items-center gap-2">
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              className="text-slate-400 hover:text-[#14B8A6] p-2 hover:bg-slate-50 rounded-xl transition cursor-pointer"
+              title="Refresh score"
+            >
+              ↻
+            </button>
+          )}
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-slate-400 hover:text-[#14B8A6] p-2 hover:bg-slate-50 rounded-xl transition cursor-pointer"
+          >
+            {expanded ? <FaChevronUp size={16} /> : <FaChevronDown size={16} />}
+          </button>
+        </div>
       </div>
 
       {/* Expandable Confidence Breakdown */}
@@ -223,7 +234,7 @@ export default function SuccessScoreCard({ scoreData, onRefresh }: Props) {
                     <input
                       type="checkbox"
                       checked={isChecked}
-                      onChange={(e) => handleSimulateChange(id, e.target.checked, rec.scoreIncrease)}
+                      onChange={(e) => handleSimulateChange(id, e.target.checked)}
                       className="h-4 w-4 rounded-sm border-[#0F172A]/10 text-[#14B8A6] focus:ring-[#14B8A6]/20 cursor-pointer mt-0.5"
                     />
                     <div className="space-y-0.5">

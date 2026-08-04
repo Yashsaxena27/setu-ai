@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaArrowRight, FaExchangeAlt, FaArrowLeft } from "react-icons/fa";
+import { FaArrowRight, FaExchangeAlt, FaArrowLeft, FaSortAmountDown } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 import Header from "../components/layout/Header";
@@ -13,6 +13,8 @@ import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import EmptyState from "../components/ui/EmptyState";
 import ReasoningOverlay from "../components/ui/ReasoningOverlay";
+import SectionHeader from "../components/ui/SectionHeader";
+import { getApplicationScore } from "../services/applicationScoreApi";
 import { parseBenefitImpact } from "../utils/benefitParser";
 
 interface Scheme {
