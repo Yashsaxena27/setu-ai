@@ -11,10 +11,7 @@ import {
   FaEdit,
   FaTrash,
   FaDownload,
-  FaCheckCircle,
-  FaTimesCircle,
   FaMapMarkedAlt,
-  FaArrowLeft,
 } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
@@ -51,8 +48,8 @@ export default function AdminPortal() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [users, setUsers] = useState<any[]>([]);
-  const [reports, setReports] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setReports] = useState<any[]>([]);
+  const [, setLoading] = useState(false);
 
   // Scheme Form Modal States
   const [schemesList, setSchemesList] = useState<any[]>([]);
@@ -453,7 +450,7 @@ export default function AdminPortal() {
                           <span className="text-[10px]">{u.gender}, {u.age} yrs</span>
                           <span className="text-[10px]">{u.district}, {u.state}</span>
                           <span>
-                            <Badge variant={u.occupation === "Farmer" ? "success" : "accent"} size="xs">
+                            <Badge variant={u.occupation === "Farmer" ? "success" : "accent"} size="sm">
                               {u.occupation || "General"}
                             </Badge>
                           </span>
@@ -532,10 +529,10 @@ export default function AdminPortal() {
                     
                     {/* Expose Excel/CSV reports downloads */}
                     <div className="flex gap-2">
-                      <Button size="xs" variant="secondary" onClick={() => triggerExport("Welfare_Penetration_Report.csv")}>
+                      <Button size="sm" variant="secondary" onClick={() => triggerExport("Welfare_Penetration_Report.csv")}>
                         <FaDownload className="mr-1.5" /> CSV Report
                       </Button>
-                      <Button size="xs" variant="secondary" onClick={() => triggerExport("CSC_Tehsil_Activity_Log.pdf")}>
+                      <Button size="sm" variant="secondary" onClick={() => triggerExport("CSC_Tehsil_Activity_Log.pdf")}>
                         <FaDownload className="mr-1.5" /> PDF Log
                       </Button>
                     </div>

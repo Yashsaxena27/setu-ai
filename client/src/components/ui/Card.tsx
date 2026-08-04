@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 
 interface CardProps {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   hoverable?: boolean;
   onClick?: () => void;

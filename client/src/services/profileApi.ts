@@ -13,6 +13,7 @@ export interface Profile {
   language: string;
   phone: string;
   rawText?: string;
+  role?: string;
 }
 
 export function getProfile() {

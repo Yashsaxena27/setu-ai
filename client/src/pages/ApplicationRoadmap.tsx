@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -7,7 +7,6 @@ import { jsPDF } from "jspdf";
 import {
   FaArrowLeft,
   FaCheckCircle,
-  FaTimesCircle,
   FaLock,
   FaRegFileAlt,
   FaUserEdit,
@@ -72,7 +71,6 @@ function CircularProgress({ percent }: { percent: number }) {
 export default function ApplicationRoadmap() {
   const { schemeId: urlSchemeId } = useParams<{ schemeId: string }>();
   const navigate = useNavigate();
-  const pdfRef = useRef<HTMLDivElement>(null);
 
   // States
   const [matchedSchemes, setMatchedSchemes] = useState<any[]>([]);
@@ -171,17 +169,6 @@ export default function ApplicationRoadmap() {
     }
   };
 
-  const getStepStatusDot = (status: string) => {
-    switch (status) {
-      case "Completed":
-        return <span className="h-2.5 w-2.5 rounded-full bg-[#22C55E]" />;
-      case "Pending":
-        return <span className="h-2.5 w-2.5 rounded-full bg-[#F59E0B]" />;
-      default:
-        return <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />;
-    }
-  };
-
   const getDifficultyBadge = (diff: string) => {
     switch (diff) {
       case "Easy":
@@ -213,7 +200,7 @@ export default function ApplicationRoadmap() {
     setWhatsappModalOpen(false);
   };
 
-  const handleCreateAlert = async (step: RoadmapStep, period: "tomorrow" | "week") => {
+  const handleCreateAlert = async (_step: RoadmapStep, period: "tomorrow" | "week") => {
     if (!selectedSchemeId || !roadmap) return;
     
     const targetDate = new Date();
@@ -429,7 +416,7 @@ export default function ApplicationRoadmap() {
                   {/* Vertical Duolingo-style Roadmap Line */}
                   <div className="relative pl-6 border-l border-slate-100 ml-4 space-y-6">
                     
-                    {roadmap.steps.map((step, idx) => {
+                    {roadmap.steps.map((step) => {
                       const isExpanded = expandedStepId === step.id;
                       const isLocked = step.status === "Locked";
                       const isCompleted = step.status === "Completed";
@@ -514,21 +501,21 @@ export default function ApplicationRoadmap() {
                                 <div className="flex flex-wrap gap-2.5 pt-2">
                                   {step.resources.website && (
                                     <a href={step.resources.website} target="_blank" rel="noreferrer">
-                                      <Button size="xs" variant="secondary" className="flex items-center gap-1">
+                                      <Button size="sm" variant="secondary" className="flex items-center gap-1">
                                         <FaExternalLinkAlt size={10} /> Visit Portal
                                       </Button>
                                     </a>
                                   )}
                                   {step.resources.helpline && (
                                     <a href={`tel:${step.resources.helpline}`}>
-                                      <Button size="xs" variant="secondary" className="flex items-center gap-1">
+                                      <Button size="sm" variant="secondary" className="flex items-center gap-1">
                                         <FaPhoneAlt size={10} /> Help: {step.resources.helpline}
                                       </Button>
                                     </a>
                                   )}
                                   {step.resources.mapLocation && (
                                     <a href={step.resources.mapLocation} target="_blank" rel="noreferrer">
-                                      <Button size="xs" variant="secondary" className="flex items-center gap-1">
+                                      <Button size="sm" variant="secondary" className="flex items-center gap-1">
                                         <FaMapMarkerAlt size={10} /> View Desk Map
                                       </Button>
                                     </a>
@@ -539,14 +526,14 @@ export default function ApplicationRoadmap() {
                                 <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-2 items-center">
                                   <span className="text-[10px] font-bold text-slate-400 uppercase">Schedule Alert:</span>
                                   <Button
-                                    size="xs"
+                                    size="sm"
                                     variant="secondary"
                                     onClick={() => handleCreateAlert(step, "tomorrow")}
                                   >
                                     Tomorrow
                                   </Button>
                                   <Button
-                                    size="xs"
+                                    size="sm"
                                     variant="secondary"
                                     onClick={() => handleCreateAlert(step, "week")}
                                   >

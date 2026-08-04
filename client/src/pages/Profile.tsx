@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { FaArrowLeft, FaLock, FaCloudDownloadAlt, FaCheck, FaExclamationTriangle } from "react-icons/fa";
+import { FaArrowLeft, FaLock, FaCloudDownloadAlt, FaExclamationTriangle } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 import { saveProfile, getProfile } from "../services/profileApi";

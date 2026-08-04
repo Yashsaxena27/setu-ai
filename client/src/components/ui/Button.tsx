@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   variant?: "primary" | "secondary" | "accent" | "danger" | "ghost";
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   loading?: boolean;
 }
 
@@ -29,6 +29,7 @@ export default function Button({
   };
 
   const sizeStyles = {
+    xs: "rounded-lg px-3 py-1.5 text-[11px]",
     sm: "rounded-xl px-4 py-2 text-xs",
     md: "rounded-xl px-6 py-3 text-sm",
     lg: "rounded-2xl px-8 py-4 text-base",
