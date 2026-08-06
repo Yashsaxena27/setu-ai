@@ -141,6 +141,7 @@ export const triggerChangeCheck = async (req: Request, res: Response) => {
         verified_by: updateRecord.verified_by,
       } as any);
 
+      scheme.markModified("eligibility_rules");
       await scheme.save();
 
       // Trigger notifications broadcast

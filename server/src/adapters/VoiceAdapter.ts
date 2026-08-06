@@ -6,10 +6,10 @@ export class VoiceAdapter {
     Welcome to Setu A.I. Government Scheme Helpline. 
     Please speak your profile details clearly, such as your age, state, occupation, and annual income.
   </Say>
-  <Gather input="speech" action="/whatsapp/voice/process" speechTimeout="auto" language="en-IN">
+  <Gather input="speech" action="/communication/voice/process" speechTimeout="auto" language="en-IN">
     <Say language="en-IN" voice="Google.en-IN-Wavenet-A">Please speak now.</Say>
   </Gather>
-  <Redirect>/whatsapp/voice/timeout</Redirect>
+  <Redirect>/communication/voice/timeout</Redirect>
 </Response>`;
   }
 
@@ -19,10 +19,10 @@ export class VoiceAdapter {
   <Say language="en-IN" voice="Google.en-IN-Wavenet-A">
     Sorry, I did not catch your details. Could you please repeat your age, state, occupation, and income?
   </Say>
-  <Gather input="speech" action="/whatsapp/voice/process" speechTimeout="auto" language="en-IN">
+  <Gather input="speech" action="/communication/voice/process" speechTimeout="auto" language="en-IN">
     <Say language="en-IN" voice="Google.en-IN-Wavenet-A">Please speak now.</Say>
   </Gather>
-  <Redirect>/whatsapp/voice/timeout</Redirect>
+  <Redirect>/communication/voice/timeout</Redirect>
 </Response>`;
   }
 

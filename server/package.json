@@ -23,7 +23,9 @@
   "build": "tsc",
  
    
-  "start": "node dist/server.js"
+  "start": "node dist/server.js",
+ 
+  "test-adapters": "ts-node src/scripts/testChannelAdapters.ts"
  
   },
  

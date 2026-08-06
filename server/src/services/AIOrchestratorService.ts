@@ -197,7 +197,7 @@ Verify the details and proceed with CSC offline portal submission.
     }
 
     if (taskType === "embedding") {
-      return Array(1536).fill(0.01);
+      return Array(768).fill(0.01);
     }
 
     return "Mock demo response.";
@@ -548,7 +548,7 @@ Example JSON response format:
       return values;
     } catch (err) {
       console.error("[AI Orchestrator Embedding Error]:", err);
-      return Array(1536).fill(0.0);
+      return Array(768).fill(0.0);
     }
   }
 

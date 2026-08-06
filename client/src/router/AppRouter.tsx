@@ -30,6 +30,7 @@ import AdminPortal from "../pages/AdminPortal";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
+import AdminRoute from "../components/auth/AdminRoute";
 import CompareSchemes from "../pages/CompareSchemes";
 import Dashboard from "../pages/Dashboard";
 
@@ -96,7 +97,9 @@ function AnimatedRoutes() {
               <Route path="/scheme-updates" element={<SchemeUpdates />} />
               <Route path="/family" element={<Family />} />
               <Route path="/chat" element={<Chat />} />
-              <Route path="/admin" element={<AdminPortal />} />
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminPortal />} />
+              </Route>
             </Route>
 
             <Route path="*" element={<NotFound />} />

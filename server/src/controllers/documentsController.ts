@@ -46,6 +46,69 @@ export const uploadDocument = async (req: Request, res: Response) => {
       });
     }
 
+    // Validate MIME types: allow only PDF, JPEG, PNG
+    const allowedMimeTypes = ["application/pdf", "image/jpeg", "image/png"];
+    const cleanMimeType = (mimeType || "").toLowerCase().trim();
+
+    if (!allowedMimeTypes.includes(cleanMimeType)) {
+      return res.status(400).json({
+        success: false,
+        message: `Disallowed MIME type: ${mimeType || "unknown"}. Only PDF, JPEG, and PNG are allowed.`,
+      });
+    }
+
+    // Double check embedded base64 Data URL prefix MIME type if present
+    let dataUriMime = "";
+    if (fileData.startsWith("data:")) {
+      const match = fileData.match(/^data:([^;]+);/);
+      if (match) {
+        dataUriMime = match[1].toLowerCase().trim();
+      }
+    }
+
+    if (dataUriMime && !allowedMimeTypes.includes(dataUriMime)) {
+      return res.status(400).json({
+        success: false,
+        message: `Disallowed embedded MIME type: ${dataUriMime}. Only PDF, JPEG, and PNG are allowed.`,
+      });
+    }
+
+    // Validate filename extension
+    const allowedExtensions = [".pdf", ".jpg", ".jpeg", ".png"];
+    const cleanFileName = (fileName || "").toLowerCase().trim();
+    const hasAllowedExtension = allowedExtensions.some(ext => cleanFileName.endsWith(ext));
+    if (fileName && !hasAllowedExtension) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid file extension. Only .pdf, .jpg, .jpeg, and .png are allowed.",
+      });
+    }
+
+    // Validate base64 length (max size check) before decoding
+    let base64Content = fileData;
+    if (base64Content.includes(";base64,")) {
+      base64Content = base64Content.split(";base64,").pop() || "";
+    }
+
+    // Base64 pattern validation
+    const base64Regex = /^[a-zA-Z0-9+/]*={0,2}$/;
+    const cleanStr = base64Content.replace(/\s/g, "");
+    if (!base64Regex.test(cleanStr)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid file data format: not a valid base64 string.",
+      });
+    }
+
+    const byteSize = (cleanStr.length * 3) / 4;
+    const MAX_SIZE = 8 * 1024 * 1024; // 8MB limit
+    if (byteSize > MAX_SIZE) {
+      return res.status(400).json({
+        success: false,
+        message: `File size exceeds the limit of ${MAX_SIZE / (1024 * 1024)}MB.`,
+      });
+    }
+
     const newDoc = new DocumentVerification({
       user_id: userId,
       scheme_id: schemeId,
