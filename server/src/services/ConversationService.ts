@@ -7,6 +7,7 @@ import Scheme from "../models/Scheme";
 import { findMatchingSchemes } from "./matchingService";
 
 import { aiOrchestrator } from "./AIOrchestratorService";
+import { sanitizeForPrompt } from "../utils/promptSanitizer";
 
 export async function retrieveContextInternal(userId: string, schemeId?: string) {
   const profile = await User.findById(userId) as any;
@@ -41,10 +42,7 @@ export async function retrieveContextInternal(userId: string, schemeId?: string)
     matchedSchemes: matches.map((m) => ({
       id: m._id,
       name: m.scheme_name,
-      benefits: m.benefits,
-      required_documents: m.required_documents,
-      official_link: m.official_link,
-      summary: m.summary,
+      category: m.category,
     })),
     uploadsList: uploads.map((u: any) => ({
       document_type: u.document_type || u.documentType,
@@ -66,9 +64,11 @@ export async function retrieveContextInternal(userId: string, schemeId?: string)
     })),
     targetScheme: targetScheme ? {
       name: targetScheme.scheme_name,
+      category: targetScheme.category,
       benefits: targetScheme.benefits,
       required_documents: targetScheme.required_documents,
       official_link: targetScheme.official_link,
+      summary_text: targetScheme.summary_text,
     } : null,
   };
 }
@@ -108,7 +108,7 @@ CRITICAL RULES:
 }
 
 RAG Context:
-${JSON.stringify(context)}
+${sanitizeForPrompt(context)}
 
 Dialogue History:
 ${historyRev.map(h => `${h.sender === "user" ? "Citizen" : "Advisor"}: ${h.text}`).join("\n")}

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { findMatchingSchemes } from "../services/matchingService";
+import { findMatchingSchemesWithReasons } from "../services/matchingService";
 import { formatMatchResponse } from "../services/matchResponseFormatter";
 
 export const matchSchemes = async (
@@ -7,7 +7,7 @@ export const matchSchemes = async (
   res: Response
 ) => {
   try {
-    const matches = await findMatchingSchemes(req.body);
+    const { matches, nonMatches } = await findMatchingSchemesWithReasons(req.body);
 
     const response = formatMatchResponse(matches);
 
@@ -15,6 +15,7 @@ export const matchSchemes = async (
       success: true,
       total: response.length,
       matches: response,
+      nonMatches,
     });
   } catch (err: any) {
     console.error("===== MATCH ERROR =====");

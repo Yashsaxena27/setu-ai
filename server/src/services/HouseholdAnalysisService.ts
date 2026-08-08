@@ -4,6 +4,7 @@ import Scheme from "../models/Scheme";
 import { findMatchingSchemes } from "./matchingService";
 
 import { aiOrchestrator } from "./AIOrchestratorService";
+import { sanitizeForPrompt } from "../utils/promptSanitizer";
 
 export function parseBenefitValue(benefitStr: string): number {
   if (!benefitStr) return 0;
@@ -149,10 +150,10 @@ You are an expert government welfare case officer.
 Analyze this household family profile and suggest optimal benefit capture.
 
 Household Members:
-${JSON.stringify(members.map(m => ({ name: m.name, relationship: m.relationship, age: m.age, occupation: m.occupation, farmer: m.farmer })))}
+${sanitizeForPrompt(members.map(m => ({ name: m.name, relationship: m.relationship, age: m.age, occupation: m.occupation, farmer: m.farmer })))}
 
 Member Matched Count:
-${JSON.stringify(memberAnalyses.map(ma => ({ name: ma.name, relationship: ma.relationship, count: ma.schemesCount, benefits: ma.estimated_benefits })))}
+${sanitizeForPrompt(memberAnalyses.map(ma => ({ name: ma.name, relationship: ma.relationship, count: ma.schemesCount, benefits: ma.estimated_benefits })))}
 
 Provide 3 concise bullet recommendations (max 12 words per bullet) on how this household can maximize benefits.
 Rules:

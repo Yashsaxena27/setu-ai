@@ -20,6 +20,12 @@ const schemeSchema = new mongoose.Schema(
 
     official_link: String,
 
+    application_deadline: Date,
+
+    prerequisite_schemes: [String],
+
+    conflict_schemes: [String],
+
     source_link: String,
 
     last_verified_date: Date,

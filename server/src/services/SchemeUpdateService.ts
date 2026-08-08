@@ -3,6 +3,18 @@ import SchemeUpdate from "../models/SchemeUpdate";
 import User from "../models/user";
 
 import { aiOrchestrator } from "./AIOrchestratorService";
+import { sanitizeForPrompt } from "../utils/promptSanitizer";
+
+export interface SchemeChangeEvent {
+  schemeId: string;
+  schemeName: string;
+  changedFields: string[];
+  previousValues: Record<string, any>;
+  newValues: Record<string, any>;
+  detectedAt: Date;
+  source: string;
+  verificationStatus: "verified" | "unverified";
+}
 
 export interface ModificationField {
   field_name: string;
@@ -70,12 +82,12 @@ You are an expert government welfare case officer.
 Explain how a government welfare scheme change affects the applicant.
 
 Applicant Profile:
-${JSON.stringify(userProfile)}
+${sanitizeForPrompt(userProfile)}
 
 Scheme Name: ${schemeName}
 Update Details:
 - Change Type: ${update.change_type}
-- Modified Fields: ${JSON.stringify(update.modified_fields)}
+- Modified Fields: ${sanitizeForPrompt(update.modified_fields)}
 - Reason for change: ${update.reason || "Administrative policy update"}
 
 Write a single brief sentence (max 15 words) explaining how this change affects this user directly.

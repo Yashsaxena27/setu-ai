@@ -6,6 +6,7 @@ import ApplicationRoadmap from "../models/ApplicationRoadmap";
 import { calculateProfileScore } from "./ApplicationScoringService";
 
 import { aiOrchestrator } from "./AIOrchestratorService";
+import { sanitizeForPrompt } from "../utils/promptSanitizer";
 
 export async function generateRoadmapInternal(userId: string, schemeId: string) {
   const scheme = await Scheme.findById(schemeId);
@@ -395,10 +396,10 @@ You are an expert government welfare case officer.
 Provide personalized AI Roadmap guidance for the user.
 
 User Profile:
-${JSON.stringify(profile)}
+${sanitizeForPrompt(profile)}
 
 Scheme Details:
-${JSON.stringify(scheme)}
+${sanitizeForPrompt(scheme)}
 
 Roadmap Current Steps:
 ${steps.map(s => `- ${s.title}: ${s.status} (Priority: ${s.priority}, Est Time: ${s.estimated_time})`).join("\n")}

@@ -244,11 +244,13 @@ export default function Profile() {
       await saveProfile(formData);
       localStorage.setItem("profile", JSON.stringify(formData));
       const result = await getMatches(formData);
-      localStorage.setItem("latestMatches", JSON.stringify(result.matches || []));
+      localStorage.setItem("latestMatches", JSON.stringify((result as any).matches || []));
+      localStorage.setItem("latestNonMatches", JSON.stringify((result as any).nonMatches || []));
       localStorage.removeItem("reasoningShown");
       navigate("/results", {
         state: {
-          matches: result.matches,
+          matches: (result as any).matches,
+          nonMatches: (result as any).nonMatches,
         },
       });
     } catch (error) {

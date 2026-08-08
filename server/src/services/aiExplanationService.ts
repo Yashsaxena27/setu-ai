@@ -1,4 +1,5 @@
 import { aiOrchestrator } from "./AIOrchestratorService";
+import { sanitizeForPrompt } from "../utils/promptSanitizer";
 
 export async function generateWhyMatch(
   profile: any,
@@ -9,10 +10,10 @@ export async function generateWhyMatch(
 You are an expert government welfare assistant.
 
 User Profile:
-${JSON.stringify(profile, null, 2)}
+${sanitizeForPrompt(profile)}
 
 Scheme:
-${JSON.stringify(scheme, null, 2)}
+${sanitizeForPrompt(scheme)}
 
 Explain why this user matches this scheme.
 
@@ -51,13 +52,13 @@ export async function generateWhySimulationChange(
 You are an expert government welfare assistant.
 
 Original User Profile:
-${JSON.stringify(originalProfile, null, 2)}
+${sanitizeForPrompt(originalProfile)}
 
 Simulated User Profile:
-${JSON.stringify(simulatedProfile, null, 2)}
+${sanitizeForPrompt(simulatedProfile)}
 
 Scheme details:
-${JSON.stringify(scheme, null, 2)}
+${sanitizeForPrompt(scheme)}
 
 Explain why this scheme became eligible due to the profile changes. 
 
@@ -131,10 +132,10 @@ You are an expert government welfare case officer.
 Explain the application success score results for the applicant.
 
 Applicant Profile:
-${JSON.stringify(profile)}
+${sanitizeForPrompt(profile)}
 
 Scheme Details:
-${JSON.stringify(scheme)}
+${sanitizeForPrompt(scheme)}
 
 Subscores Breakdown:
 - Eligibility: ${subScores.eligibility}%

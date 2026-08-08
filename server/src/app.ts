@@ -27,6 +27,8 @@ import communicationRoutes from "./routes/communication";
 import correctionRoutes from "./routes/corrections";
 import dashboardRoutes from "./routes/dashboard";
 import pipelineRoutes from "./routes/pipeline";
+import userApplicationsRoutes from "./routes/userApplications";
+import intelligenceRoutes from "./routes/intelligence";
 import { initScheduler } from "./scripts/scheduler";
 
 dotenv.config();
@@ -74,6 +76,8 @@ app.use("/communication", communicationRoutes);
 app.use("/corrections", correctionRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/pipeline", pipelineRoutes);
+app.use("/applications", userApplicationsRoutes);
+app.use("/intelligence", intelligenceRoutes);
 
 // Initialize background jobs
 initScheduler();

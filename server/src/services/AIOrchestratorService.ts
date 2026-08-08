@@ -180,6 +180,23 @@ Verify the details and proceed with CSC offline portal submission.
       ];
     }
 
+    if (taskType === "rejection-recovery") {
+      return {
+        explanation: "Generating detailed rejection analysis...",
+        corrective_actions: ["Wait for AI analysis to complete."],
+        missing_info: "Identifying missing information...",
+        grievance_draft: "Preparing draft grievance letter...",
+        contact_info: "Locating nodal officer contact details..."
+      };
+    }
+
+    if (taskType === "portfolio-explainer" || taskType === "dual-voice") {
+       return {
+         official: "Analyzing official verified scheme documents...",
+         simple: "Please wait, we are generating a simple explanation for you..."
+       };
+    }
+
     if (taskType === "digilocker-parse" || taskType === "parse-profile") {
       return {
         name: "Kamla Devi",
@@ -399,17 +416,24 @@ Verify the details and proceed with CSC offline portal submission.
           },
         });
       } else if (taskType === "copilot-chat" || taskType === "digilocker-parse" || taskType === "parse-profile") {
+        const config: any = { responseMimeType: "application/json" };
+        if (taskType === "digilocker-parse" || taskType === "parse-profile") {
+          config.maxOutputTokens = 250;
+        }
         response = await aiClient.models.generateContent({
           model: "gemini-2.5-flash",
           contents: prompt,
-          config: {
-            responseMimeType: "application/json",
-          },
+          config,
         });
       } else {
+        const config: any = {};
+        if (taskType === "impact-analysis" || taskType === "simulation-summary-text" || taskType === "admin-insights") {
+          config.maxOutputTokens = 150;
+        }
         response = await aiClient.models.generateContent({
           model: "gemini-2.5-flash",
           contents: prompt,
+          config: Object.keys(config).length > 0 ? config : undefined,
         });
       }
 

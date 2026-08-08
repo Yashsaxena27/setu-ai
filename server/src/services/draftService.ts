@@ -1,4 +1,5 @@
 import { aiOrchestrator } from "./AIOrchestratorService";
+import { sanitizeForPrompt } from "../utils/promptSanitizer";
 
 export async function generateDraft(
   profile: any,
@@ -9,10 +10,10 @@ export async function generateDraft(
 Generate a professional government application draft.
 
 Applicant:
-${JSON.stringify(profile)}
+${sanitizeForPrompt(profile)}
 
 Scheme:
-${JSON.stringify(scheme)}
+${sanitizeForPrompt(scheme)}
 
 Write the following sections:
 

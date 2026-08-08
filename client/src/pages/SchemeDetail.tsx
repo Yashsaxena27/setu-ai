@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { getExplanation } from "../services/explain";
 import { getApplicationScore } from "../services/applicationScoreApi";
+import { getDeadlineIntelligence } from "../services/intelligenceApi";
 import { FaArrowLeft, FaCheckCircle, FaInfoCircle } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
@@ -17,6 +18,7 @@ import SectionHeader from "../components/ui/SectionHeader";
 import Skeleton from "../components/ui/Skeleton";
 import Reveal from "../components/effects/Reveal";
 import SuccessScoreCard from "../components/ui/SuccessScoreCard";
+import SmartDeadlineBadge from "../components/ui/SmartDeadlineBadge";
 
 import FreshnessBadge from "../components/ui/FreshnessBadge";
 import OfficialPortalCTA from "../components/ui/OfficialPortalCTA";
@@ -56,6 +58,8 @@ export default function SchemeDetail() {
   // Success score states
   const [successScoreData, setSuccessScoreData] = useState<any>(null);
   const [loadingScore, setLoadingScore] = useState(false);
+  
+  const [deadlineInfo, setDeadlineInfo] = useState<any>(null);
 
   const fetchSuccessScore = async () => {
     if (!scheme?._id) return;
@@ -72,6 +76,12 @@ export default function SchemeDetail() {
 
   useEffect(() => {
     fetchSuccessScore();
+    
+    if (scheme?._id) {
+      getDeadlineIntelligence(scheme._id)
+        .then(res => setDeadlineInfo(res))
+        .catch(err => console.error("Failed to load deadline info", err));
+    }
   }, [scheme?._id]);
 
   useEffect(() => {
@@ -82,6 +92,20 @@ export default function SchemeDetail() {
     );
 
     async function loadExplanation() {
+      // P0.3: Client-side SessionStorage Cache Check
+      const cacheKey = `explain_${scheme._id}`;
+      const cachedExplanation = sessionStorage.getItem(cacheKey);
+      if (cachedExplanation) {
+        try {
+          const parsed = JSON.parse(cachedExplanation);
+          setReasons(parsed);
+          setLoadingReason(false);
+          return;
+        } catch (e) {
+          sessionStorage.removeItem(cacheKey);
+        }
+      }
+
       try {
         const result = await getExplanation(
           scheme._id,
@@ -100,6 +124,7 @@ export default function SchemeDetail() {
             line.replace(/^[-•]\s*/, "").trim()
           );
 
+        sessionStorage.setItem(cacheKey, JSON.stringify(parsedReasons));
         setReasons(parsedReasons);
         setLoadingReason(false);
       } catch (err) {
@@ -156,9 +181,18 @@ export default function SchemeDetail() {
           {/* Scheme Main Info Header */}
           <Reveal direction="up">
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-2 items-center">
-                <Badge variant="accent">{scheme.category || "Welfare"}</Badge>
-                {scheme.level && <Badge variant="info">{scheme.level}</Badge>}
+              <div className="flex flex-wrap gap-2 items-center justify-between">
+                <div className="flex gap-2">
+                  <Badge variant="accent">{scheme.category || "Welfare"}</Badge>
+                  {scheme.level && <Badge variant="info">{scheme.level}</Badge>}
+                </div>
+                {deadlineInfo && (
+                  <SmartDeadlineBadge 
+                    schemeId={scheme._id} 
+                    schemeName={scheme.scheme_name} 
+                    deadlineInfo={deadlineInfo} 
+                  />
+                )}
               </div>
               <h1 className="font-serif text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0F172A] leading-tight">
                 {scheme.scheme_name}

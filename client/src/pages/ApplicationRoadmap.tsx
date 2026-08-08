@@ -41,6 +41,11 @@ import {
   type RoadmapStep,
 } from "../services/applicationRoadmapApi";
 import { createReminder } from "../services/reminder";
+import ApplicationStatusTracker from "../components/ui/ApplicationStatusTracker";
+import NextBestActionBanner from "../components/ui/NextBestActionBanner";
+import RejectionRecoveryModal from "../components/ui/RejectionRecoveryModal";
+import { getApplications } from "../services/applicationApi";
+import { getNextBestAction } from "../services/intelligenceApi";
 
 function CircularProgress({ percent }: { percent: number }) {
   const radius = 32;
@@ -80,6 +85,10 @@ export default function ApplicationRoadmap() {
   const [expandedStepId, setExpandedStepId] = useState<string | null>(null);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [whatsappPreview, setWhatsappPreview] = useState("");
+  
+  const [appStatus, setAppStatus] = useState<any>(null);
+  const [nba, setNba] = useState<any>(null);
+  const [showRecovery, setShowRecovery] = useState(false);
 
   // Load matched schemes list
   useEffect(() => {
@@ -106,8 +115,21 @@ export default function ApplicationRoadmap() {
     try {
       const res = await getApplicationRoadmap(selectedSchemeId);
       setRoadmap(res.roadmap);
-      // Auto-expand current active step
       setExpandedStepId(res.roadmap.current_step);
+      
+      const appsRes = await getApplications();
+      const currentApp = appsRes.applications?.find((a: any) => a.scheme_id === selectedSchemeId);
+      if (currentApp) {
+        setAppStatus(currentApp);
+      } else {
+        setAppStatus(null);
+      }
+      
+      const nbaRes = await getNextBestAction(selectedSchemeId);
+      if (nbaRes) {
+        setNba(nbaRes);
+      }
+      
     } catch (e) {
       console.error(e);
       toast.error("Failed to load application roadmap.");
@@ -357,25 +379,22 @@ export default function ApplicationRoadmap() {
                   <CircularProgress percent={roadmap.completion_percentage} />
                 </Card>
 
-                {/* Next Best Action Widget */}
-                {activeStep && (
-                  <Card className="border border-[#14B8A6]/20 bg-[#14B8A6]/5 p-6 rounded-3xl shadow-soft space-y-4">
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-bold text-[#0D9488] uppercase tracking-widest block">
-                        Next Best Action
-                      </span>
-                      <h3 className="font-serif text-lg font-bold text-[#0F172A]">
-                        {activeStep.title}
-                      </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                        {activeStep.description}
-                      </p>
-                    </div>
-
-                    <Button className="w-full" onClick={() => handleNextActionClick(activeStep)}>
-                      Continue Journey: {activeStep.title}
-                    </Button>
-                  </Card>
+                {/* Next Best Action Banner (Feature 2) */}
+                {nba && (
+                  <div className="cursor-pointer" onClick={() => {
+                     if (nba.actionType === "REJECTION_RECOVERY") setShowRecovery(true);
+                     else if (activeStep) handleNextActionClick(activeStep as RoadmapStep);
+                  }}>
+                    <NextBestActionBanner action={nba} />
+                  </div>
+                )}
+                
+                {/* Government Status Tracker (Feature 1) */}
+                {appStatus && (
+                  <ApplicationStatusTracker 
+                    status={appStatus.status} 
+                    lastUpdated={appStatus.last_updated} 
+                  />
                 )}
 
                 {/* AI Assistant Guidance */}
@@ -573,8 +592,15 @@ export default function ApplicationRoadmap() {
 
         </div>
       </PageContainer>
+      
+      {showRecovery && selectedSchemeId && (
+        <RejectionRecoveryModal 
+          schemeId={selectedSchemeId} 
+          onClose={() => setShowRecovery(false)} 
+        />
+      )}
 
-      {/* WhatsApp simulated Preview Modal */}
+      {/* WhatsApp Modal */}
       <AnimatePresence>
         {whatsappModalOpen && (
           <div className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">

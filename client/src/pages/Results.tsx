@@ -20,6 +20,7 @@ import HouseholdMatchSummary from "../components/ui/HouseholdMatchSummary";
 import DeadlineBadge from "../components/ui/DeadlineBadge";
 import StoryBadge from "../components/ui/StoryBadge";
 import AITransparencyBadge from "../components/ui/AITransparencyBadge";
+import WhyNotExpandable from "../components/ui/WhyNotExpandable";
 import { parseBenefitImpact } from "../utils/benefitParser";
 import { getApplicationScore } from "../services/applicationScoreApi";
 
@@ -93,6 +94,15 @@ export default function Results() {
       return location.state.matches;
     }
     const cached = localStorage.getItem("latestMatches");
+    return cached ? JSON.parse(cached) : [];
+  });
+  
+  const [nonMatches] = useState<any[]>(() => {
+    if (location.state?.nonMatches) {
+      localStorage.setItem("latestNonMatches", JSON.stringify(location.state.nonMatches));
+      return location.state.nonMatches;
+    }
+    const cached = localStorage.getItem("latestNonMatches");
     return cached ? JSON.parse(cached) : [];
   });
   
@@ -490,6 +500,36 @@ export default function Results() {
               </motion.div>
             )}
           </div>
+
+          {/* Not Eligible Section */}
+          {nonMatches.length > 0 && (
+            <div className="mt-12 space-y-6">
+               <div className="space-y-2">
+                 <h2 className="font-serif text-2xl font-extrabold text-[#0F172A] tracking-tight border-t border-slate-200 pt-8">
+                   Other Evaluated Schemes (Not Eligible)
+                 </h2>
+                 <p className="text-slate-500 text-xs font-bold">
+                   We evaluated {nonMatches.length} other schemes, but your profile did not meet their strict eligibility criteria.
+                 </p>
+               </div>
+               
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 {nonMatches.map((nm: any, idx: number) => (
+                   <Card key={idx} className="border border-slate-200/60 p-5 bg-white opacity-80">
+                     <div className="flex justify-between items-start mb-2">
+                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                         {nm.scheme.category}
+                       </span>
+                     </div>
+                     <h3 className="font-serif text-base font-bold text-slate-800 line-clamp-1">
+                       {nm.scheme.scheme_name}
+                     </h3>
+                     <WhyNotExpandable reasons={nm.reasons} />
+                   </Card>
+                 ))}
+               </div>
+            </div>
+          )}
 
           {/* Compare Sticky Action Bar */}
           {selectedSchemes.length === 2 && (

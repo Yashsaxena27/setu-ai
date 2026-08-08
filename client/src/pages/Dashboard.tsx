@@ -15,8 +15,10 @@ import Timeline from "../components/ui/Timeline";
 import EmptyState from "../components/ui/EmptyState";
 import HouseholdMatchSummary from "../components/ui/HouseholdMatchSummary";
 import BenefitSummaryCard from "../components/ui/BenefitSummaryCard";
+import PortfolioPlanCard from "../components/ui/PortfolioPlanCard";
 import { getApplicationScore } from "../services/applicationScoreApi";
 import { getProfile } from "../services/profileApi";
+import { getPortfolioPlan } from "../services/intelligenceApi";
 
 interface DraftItem {
   id: string;
@@ -39,6 +41,7 @@ export default function Dashboard() {
   const [recentDrafts, setRecentDrafts] = useState<DraftItem[]>([]);
   const [recentMatches, setRecentMatches] = useState<MatchItem[]>([]);
   const [successScores, setSuccessScores] = useState<Record<string, number>>({});
+  const [portfolioPlan, setPortfolioPlan] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -86,6 +89,18 @@ export default function Dashboard() {
       setSuccessScores(map);
     };
     fetchScores();
+    
+    const fetchPortfolio = async () => {
+      try {
+        const plan = await getPortfolioPlan();
+        if (plan && plan.sequence && plan.sequence.length > 0) {
+          setPortfolioPlan(plan);
+        }
+      } catch (e) {
+        console.error("Failed to load portfolio plan");
+      }
+    };
+    fetchPortfolio();
   }, [recentMatches]);
 
   const activityItems = [
@@ -160,6 +175,14 @@ export default function Dashboard() {
 
             {/* Benefit Summary Section */}
             <BenefitSummaryCard />
+
+            {/* AI Portfolio Plan (Feature 7) */}
+            {portfolioPlan && (
+              <div className="pt-2">
+                <PortfolioPlanCard plan={portfolioPlan} />
+              </div>
+            )}
+
             {/* Content Row: Left Activities, Right Actions */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               
