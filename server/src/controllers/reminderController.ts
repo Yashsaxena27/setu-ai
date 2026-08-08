@@ -6,51 +6,61 @@ export const getReminders = async (
   req: AuthRequest,
   res: Response
 ) => {
-  const reminders = await Reminder.find({
-    user_id: req.userId,
-  });
-
-  res.json(reminders);
+  try {
+    const reminders = await Reminder.find({
+      user_id: req.userId,
+    });
+    res.json(reminders);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch reminders" });
+  }
 };
 
 export const createReminder = async (
   req: AuthRequest,
   res: Response
 ) => {
-  const reminder = await Reminder.create({
-    ...req.body,
-    user_id: req.userId,
-  });
-
-  res.status(201).json(reminder);
+  try {
+    const reminder = await Reminder.create({
+      ...req.body,
+      user_id: req.userId,
+    });
+    res.status(201).json(reminder);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create reminder" });
+  }
 };
 
 export const updateReminder = async (
   req: AuthRequest,
   res: Response
 ) => {
-  const reminder = await Reminder.findOneAndUpdate(
-    {
-      _id: req.params.id,
-      user_id: req.userId,
-    },
-    req.body,
-    { new: true }
-  );
-
-  res.json(reminder);
+  try {
+    const reminder = await Reminder.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        user_id: req.userId,
+      },
+      req.body,
+      { new: true }
+    );
+    res.json(reminder);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update reminder" });
+  }
 };
 
 export const deleteReminder = async (
   req: AuthRequest,
   res: Response
 ) => {
-  await Reminder.findOneAndDelete({
-    _id: req.params.id,
-    user_id: req.userId,
-  });
-
-  res.json({
-    message: "Reminder deleted",
-  });
+  try {
+    await Reminder.findOneAndDelete({
+      _id: req.params.id,
+      user_id: req.userId,
+    });
+    res.json({ message: "Reminder deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete reminder" });
+  }
 };

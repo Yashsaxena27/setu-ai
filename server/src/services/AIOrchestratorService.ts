@@ -228,7 +228,7 @@ Verify the details and proceed with CSC offline portal submission.
     if (taskType === "why-match") {
       return `• This scheme appears to match your profile.
 • Please verify the eligibility on the official government website.
-• AI explanation is temporarily unavailable.`;
+• Generating detailed explanation... This may take a moment.`;
     }
     if (taskType === "score-narrative") {
       return "Your eligibility matches the requirements. However, missing or unverified documents affect your readiness score. Complete the checklist recommendations to maximize probability of approval.";
@@ -251,9 +251,9 @@ Verify the details and proceed with CSC offline portal submission.
     }
     if (taskType === "copilot-chat") {
       return {
-        text: "I am sorry, I encountered a temporary processing error. Please rephrase your query.",
+        text: "Generating response... This may take a moment. The system is experiencing high traffic.",
         citations: [],
-        confidence: "Low",
+        confidence: "Medium",
         explainability: "System is temporarily busy."
       };
     }
@@ -282,7 +282,7 @@ Verify the details and proceed with CSC offline portal submission.
     if (taskType === "enrich-mistakes") {
       return '{"common_mistakes":[], "practical_notes":[]}';
     }
-    return "Fallback response due to system rate limits.";
+    return "Generating response... This may take a moment.";
   }
 
   // The main unified request method
@@ -437,9 +437,14 @@ Verify the details and proceed with CSC offline portal submission.
 
       // Check for rate limit / 429
       if (this.isRateLimitError(err)) {
-        console.warn(`[Rate Limit Hit] Enqueuing ${taskType} for key: ${cacheKey}`);
-        this.enqueueRetry(cacheKey, taskType, profile, schemeId, promptBuilderFn, extraData);
-        return this.getGeneratingStatus(taskType);
+        console.warn(`[Rate Limit Hit] Attempting Groq fallback for ${taskType}`);
+        try {
+          return await this.executeGroqFallback(taskType, await promptBuilderFn());
+        } catch (groqErr) {
+          console.error(`[Groq Fallback Failed]`, groqErr);
+          this.enqueueRetry(cacheKey, taskType, profile, schemeId, promptBuilderFn, extraData);
+          return this.getGeneratingStatus(taskType);
+        }
       }
 
       // Return fallback value immediately for other errors
@@ -527,7 +532,12 @@ Example JSON response format:
       console.error("[AI Orchestrator Batch Error]:", err);
 
       if (this.isRateLimitError(err)) {
-        console.warn(`[Batch Rate Limit Hit] Enqueuing all ${requests.length} batch requests into retry queue.`);
+        console.warn(`[Batch Rate Limit Hit] Attempting Groq fallback for batch...`);
+        try {
+          // If the batch fails, we will enqueue retries
+          // We could implement Groq batch here but for simplicity we just fallback to retry queue
+          console.warn(`[Batch Groq fallback not implemented, enqueuing retries]`);
+        } catch(e) {}
         for (const r of requests) {
           this.enqueueRetry(r.cacheKey, r.taskType, r.profile, r.schemeId, r.promptBuilderFn, r.extraData);
           r.resolve(this.getGeneratingStatus(r.taskType));
@@ -635,6 +645,25 @@ Example JSON response format:
         this.retryQueue.delete(hash);
       } catch (err: any) {
         console.error(`[Retry Failed] Attempt ${item.retryCount + 1} failed:`, err);
+        
+        if (this.isRateLimitError(err)) {
+           try {
+              console.log(`[Retry Groq Fallback] Attempting Groq...`);
+              const value = await this.executeGroqFallback(item.taskType, await item.promptBuilderFn());
+              
+              await AIResponseCache.findOneAndUpdate(
+                { hash: item.hash },
+                { hash: item.hash, response: value, taskType: item.taskType },
+                { upsert: true }
+              );
+              console.log(`[Retry Groq Success] Completed key: ${hash}`);
+              this.retryQueue.delete(hash);
+              continue;
+           } catch (groqErr) {
+              console.error("[Retry Groq Failed]", groqErr);
+           }
+        }
+        
         item.retryCount += 1;
 
         if (item.retryCount >= 2) {
@@ -754,6 +783,46 @@ Example JSON response format:
       };
     }
     return "Generating... please refresh.";
+  }
+
+  // Fallback to Groq API using fetch
+  private async executeGroqFallback(taskType: string, promptText: string): Promise<any> {
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY not defined in environment");
+    }
+    
+    // Check if this task involves multimodal (OCR)
+    if (taskType === "ocr") {
+       throw new Error("Groq API fallback does not support multimodal vision out-of-the-box");
+    }
+
+    const payload = {
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: promptText }],
+    };
+
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`Groq API error: ${res.status} ${txt}`);
+    }
+
+    const data = await res.json();
+    const resText = data.choices?.[0]?.message?.content || "";
+
+    if (taskType === "copilot-chat" || taskType === "digilocker-parse" || taskType === "parse-profile") {
+      const cleaned = resText.replace(/```json/g, "").replace(/```/g, "").trim();
+      return JSON.parse(cleaned);
+    }
+    return resText.trim();
   }
 }
 

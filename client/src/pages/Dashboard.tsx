@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaUserEdit, FaSearch, FaSlidersH, FaFileAlt, FaBullhorn, FaUsers, FaRobot, FaShieldAlt } from "react-icons/fa";
+import { FaUserEdit, FaSearch, FaFileAlt, FaUsers, FaRobot, FaShieldAlt } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -97,13 +97,13 @@ export default function Dashboard() {
 
   const sidebarLinks = [
     { label: "Overview", active: true, onClick: () => navigate("/dashboard") },
+    { label: "Family Household", active: false, onClick: () => navigate("/family") },
     { label: "Profile Wizard", active: false, onClick: () => navigate("/profile") },
     { label: "Matches Results", active: false, onClick: () => navigate("/results") },
     { label: "Simulator Panel", active: false, onClick: () => navigate("/eligibility-simulator") },
     { label: "Document Verification", active: false, onClick: () => navigate("/document-verification") },
     { label: "Application Roadmap", active: false, onClick: () => navigate("/application-roadmap") },
     { label: "Scheme Tracker", active: false, onClick: () => navigate("/scheme-updates") },
-    { label: "Family Household", active: false, onClick: () => navigate("/family") },
     { label: "AI Copilot", active: false, onClick: () => navigate("/chat") },
     ...(isAdmin ? [{ label: "Admin Console", active: false, onClick: () => navigate("/admin") }] : []),
     { label: "Account Settings", active: false, onClick: () => navigate("/settings") },
@@ -153,6 +153,11 @@ export default function Dashboard() {
               </p>
             </div>
 
+            {/* Household Matching Summary (Moved to top) */}
+            <div className="pt-2">
+              <HouseholdMatchSummary />
+            </div>
+
             {/* Benefit Summary Section */}
             <BenefitSummaryCard />
             {/* Content Row: Left Activities, Right Actions */}
@@ -160,7 +165,7 @@ export default function Dashboard() {
               
               {/* Activity Timeline */}
               <Card className="border border-[#0F172A]/5">
-                <SectionHeader title="Recent Milestones" />
+                <SectionHeader title="Platform Capabilities" />
                 <div className="pt-2">
                   <Timeline items={activityItems} />
                 </div>
@@ -191,38 +196,6 @@ export default function Dashboard() {
                     <FaSearch />
                   </Button>
                   <Button
-                    onClick={() => navigate("/eligibility-simulator")}
-                    variant="secondary"
-                    className="w-full justify-between"
-                  >
-                    <span>Eligibility Simulator</span>
-                    <FaSlidersH />
-                  </Button>
-                  <Button
-                    onClick={() => navigate("/document-verification")}
-                    variant="secondary"
-                    className="w-full justify-between"
-                  >
-                    <span>Document Verification</span>
-                    <FaFileAlt />
-                  </Button>
-                  <Button
-                    onClick={() => navigate("/application-roadmap")}
-                    variant="secondary"
-                    className="w-full justify-between"
-                  >
-                    <span>Application Roadmap</span>
-                    <FaSlidersH />
-                  </Button>
-                  <Button
-                    onClick={() => navigate("/scheme-updates")}
-                    variant="secondary"
-                    className="w-full justify-between"
-                  >
-                    <span>Scheme Change Tracker</span>
-                    <FaBullhorn />
-                  </Button>
-                  <Button
                     onClick={() => navigate("/family")}
                     variant="secondary"
                     className="w-full justify-between"
@@ -251,10 +224,7 @@ export default function Dashboard() {
                 </div>
               </Card>
             </div>
-            {/* Household Matching Summary */}
-            <div className="pt-2">
-              <HouseholdMatchSummary />
-            </div>
+
 
             {/* Recent Matches Section */}
             <div className="space-y-4">

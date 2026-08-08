@@ -162,14 +162,14 @@ export default function Landing() {
                   {/* Trust badges row */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold text-slate-500 pt-2 border-t border-slate-200/60">
                     <span className="flex items-center gap-1 text-[#0D9488]">
-                      <FaShieldAlt className="h-3 w-3" /> DPDP Act 2023 Compliant
+                      <FaShieldAlt className="h-3 w-3" /> Designed with DPDP principles
                     </span>
                     <span className="text-slate-300">•</span>
                     <span>Zero Data Resale</span>
                     <span className="text-slate-300">•</span>
                     <span>Direct Government Links</span>
                     <span className="text-slate-300">•</span>
-                    <span>256-bit Encrypted</span>
+                    <span>Encrypted in Transit</span>
                   </div>
                 </div>
               </Reveal>

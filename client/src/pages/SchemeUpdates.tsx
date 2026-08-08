@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 import {
   FaArrowLeft,
   FaSearch,
-  FaPlay,
   FaCopy,
   FaShareAlt,
   FaExternalLinkAlt,
@@ -23,7 +22,6 @@ import EmptyState from "../components/ui/EmptyState";
 import {
   getUpdatesFeed,
   getMyImpact,
-  triggerChangeCheck,
   type SchemeUpdateRecord,
   type ImpactDashboard,
 } from "../services/schemeUpdatesApi";
@@ -35,7 +33,6 @@ export default function SchemeUpdates() {
   const [updates, setUpdates] = useState<SchemeUpdateRecord[]>([]);
   const [impact, setImpact] = useState<ImpactDashboard | null>(null);
   const [loading, setLoading] = useState(false);
-  const [simulating, setSimulating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string>("all");
 
@@ -67,23 +64,7 @@ export default function SchemeUpdates() {
     }
   };
 
-  // Simulate change check
-  const handleTriggerSimulation = async () => {
-    setSimulating(true);
-    try {
-      toast.loading("Simulating government portal scrape...", { id: "sim-scrape" });
-      const res = await triggerChangeCheck();
-      toast.success(res.message, { id: "sim-scrape" });
-      
-      // Reload feed and impact metrics
-      loadUpdates();
-      loadImpactMetrics();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to trigger change simulation.", { id: "sim-scrape" });
-    } finally {
-      setSimulating(false);
-    }
-  };
+
 
   const handleCopySummary = (u: SchemeUpdateRecord) => {
     let txt = `Setu AI - Government Scheme Update\n`;
@@ -125,13 +106,7 @@ export default function SchemeUpdates() {
               <FaArrowLeft className="mr-2 h-3.5 w-3.5" /> Back to Dashboard
             </Button>
 
-            <Button
-              onClick={handleTriggerSimulation}
-              disabled={simulating}
-              className="flex items-center gap-1.5"
-            >
-              <FaPlay className="h-3 w-3" /> Simulate Gov Change Scrape
-            </Button>
+
           </div>
 
           <div className="space-y-2">

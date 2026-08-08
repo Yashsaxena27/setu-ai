@@ -48,7 +48,7 @@ export default function StoryBadge({ variant, className = "" }: StoryBadgeProps)
       icon: FaMagic,
     },
     "government-verified": {
-      label: "Government Verified",
+      label: "Sourced from Official Data",
       bg: "bg-emerald-50",
       text: "text-emerald-800",
       border: "border-emerald-200",

@@ -84,7 +84,7 @@ export default function Header() {
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden items-center justify-center flex-1 gap-4 lg:gap-7 xl:flex">
+            <nav className="hidden items-center justify-center flex-1 gap-4 lg:gap-7 lg:flex">
               <Link
                 to="/"
                 onClick={handleHomeClick}
@@ -174,7 +174,7 @@ export default function Header() {
 
             </nav>
 
-            <div className="hidden items-center xl:flex flex-shrink-0 ml-4">
+            <div className="hidden items-center lg:flex flex-shrink-0 ml-4">
               {!user ? (
                 <MagneticButton>
                   <Button onClick={() => navigate("/login")}>
@@ -195,7 +195,7 @@ export default function Header() {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-full p-2 text-[#0F172A] hover:bg-black/5 xl:hidden cursor-pointer"
+              className="rounded-full p-2 text-[#0F172A] hover:bg-black/5 lg:hidden cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <FaTimes className="h-5 w-5" /> : <FaBars className="h-5 w-5" />}

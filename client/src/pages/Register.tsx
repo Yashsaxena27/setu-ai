@@ -68,7 +68,7 @@ export default function Register() {
         </div>
 
         <div className="text-xs text-slate-500 font-semibold relative z-10">
-          Setu AI adheres to secure processing guidelines. Your data is encrypted and accessible only to you.
+          Setu AI adheres to secure processing guidelines. Your data is transmitted securely and stored privately.
         </div>
       </div>
 

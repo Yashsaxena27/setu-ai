@@ -94,7 +94,7 @@ export default function Settings() {
                 Verified Security Protocols Active
               </h4>
               <p className="text-[10px] text-slate-500 font-semibold leading-normal">
-                Your profile information is encrypted in transit and at rest. Account deletion will permanently erase all search history, generated drafts, and saved profile data.
+                Your profile information is transmitted securely and stored privately. Account deletion will permanently erase all search history, generated drafts, and saved profile data.
               </p>
             </div>
           </Card>

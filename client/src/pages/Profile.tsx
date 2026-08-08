@@ -329,7 +329,7 @@ export default function Profile() {
               </div>
               <div className="space-y-1">
                 <h4 className="font-serif text-sm font-extrabold text-[#0F172A]">
-                  Auto-Build Profile via DigiLocker
+                  Auto-Build Profile via DigiLocker <span className="text-[10px] text-slate-400 font-bold ml-1">(Demo Gateway)</span>
                 </h4>
                 <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                   Connect your verified government DigiLocker to auto-fill your profile in 30 seconds instead of manual entries.

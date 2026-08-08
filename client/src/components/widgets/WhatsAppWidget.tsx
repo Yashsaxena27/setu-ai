@@ -236,7 +236,7 @@ export default function WhatsAppWidget() {
                 {/* Footnote */}
                 <div className="flex items-center justify-center gap-1.5 text-[9px] font-bold text-slate-400 pt-1 border-t border-slate-50">
                   <FaShieldAlt className="text-[#14B8A6] h-3 w-3" />
-                  <span>24/7 Government Welfare AI Portal</span>
+                  <span>24/7 AI Welfare Assistant</span>
                 </div>
               </div>
             </motion.div>
