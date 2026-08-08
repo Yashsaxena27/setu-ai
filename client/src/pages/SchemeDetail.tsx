@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { getExplanation } from "../services/explain";
 import { getApplicationScore } from "../services/applicationScoreApi";
-import { FaArrowLeft, FaCheckCircle, FaInfoCircle, FaFileContract } from "react-icons/fa";
+import { FaArrowLeft, FaCheckCircle, FaInfoCircle } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -17,6 +17,19 @@ import SectionHeader from "../components/ui/SectionHeader";
 import Skeleton from "../components/ui/Skeleton";
 import Reveal from "../components/effects/Reveal";
 import SuccessScoreCard from "../components/ui/SuccessScoreCard";
+
+import FreshnessBadge from "../components/ui/FreshnessBadge";
+import OfficialPortalCTA from "../components/ui/OfficialPortalCTA";
+import TrustDisclaimer from "../components/ui/TrustDisclaimer";
+import AITransparencyBadge from "../components/ui/AITransparencyBadge";
+import SourceCitation from "../components/ui/SourceCitation";
+import ReportIncorrect from "../components/ui/ReportIncorrect";
+import ActionPlan from "../components/ui/ActionPlan";
+import CorrectionLog from "../components/ui/CorrectionLog";
+import EligibilityExamples from "../components/ui/EligibilityExamples";
+import CommonMistakes from "../components/ui/CommonMistakes";
+import PracticalNotes from "../components/ui/PracticalNotes";
+import DocumentProgress from "../components/ui/DocumentProgress";
 
 export default function SchemeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -36,7 +49,7 @@ export default function SchemeDetail() {
     }
   }, [scheme, navigate]);
 
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("actionplan");
   const [reasons, setReasons] = useState<string[]>([]);
   const [loadingReason, setLoadingReason] = useState(true);
 
@@ -116,6 +129,7 @@ export default function SchemeDetail() {
   }
 
   const detailTabs = [
+    { id: "actionplan", label: "Setu Action Plan" },
     { id: "overview", label: "Overview" },
     { id: "eligibility", label: "Eligibility Criteria" },
     { id: "benefits", label: "Scheme Benefits" },
@@ -149,14 +163,23 @@ export default function SchemeDetail() {
               <h1 className="font-serif text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0F172A] leading-tight">
                 {scheme.scheme_name}
               </h1>
-              <div className="flex items-center gap-4 bg-white px-5 py-3.5 rounded-2xl border border-[#0F172A]/5 shadow-soft w-fit">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  AI Match Score
-                </span>
-                <span className="text-2xl font-serif font-black text-[#22C55E]">
-                  {scheme.score}%
-                </span>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-4 bg-white px-5 py-3.5 rounded-2xl border border-[#0F172A]/5 shadow-soft w-fit">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    AI Match Score
+                  </span>
+                  <span className="text-2xl font-serif font-black text-[#22C55E]">
+                    {scheme.score}%
+                  </span>
+                </div>
+                <FreshnessBadge 
+                  lastVerifiedDate={scheme.last_verified_date || scheme.createdAt || new Date()} 
+                  status={scheme.freshness_status}
+                />
+                <CorrectionLog schemeId={scheme._id} />
+                <ReportIncorrect schemeId={scheme._id} fieldName="General/Header" />
               </div>
+              <TrustDisclaimer className="mt-4" />
             </div>
           </Reveal>
 
@@ -170,6 +193,11 @@ export default function SchemeDetail() {
           {/* Tab Content Cards */}
           <Card className="border border-[#0F172A]/5 p-8 shadow-premium min-h-[250px]">
             
+            {/* ACTION PLAN TAB */}
+            {activeTab === "actionplan" && (
+              <ActionPlan schemeId={scheme._id} schemeUrl={scheme.official_portal_url} />
+            )}
+
             {/* OVERVIEW TAB */}
             {activeTab === "overview" && (
               <div className="space-y-6">
@@ -195,6 +223,9 @@ export default function SchemeDetail() {
                     </p>
                   </div>
                 </div>
+                
+                <CommonMistakes mistakes={scheme.common_mistakes} />
+                <PracticalNotes notes={scheme.practical_notes} />
               </div>
             )}
 
@@ -225,6 +256,8 @@ export default function SchemeDetail() {
                       );
                     })}
                 </ul>
+
+                <EligibilityExamples examples={scheme.eligibility_examples} />
               </div>
             )}
 
@@ -250,29 +283,18 @@ export default function SchemeDetail() {
             {/* DOCUMENTS TAB */}
             {activeTab === "documents" && (
               <div className="space-y-6">
-                <SectionHeader title="Required Documentation Checklist" />
-                {scheme.required_documents && scheme.required_documents.length > 0 ? (
-                  <div className="space-y-6">
-                    <ul className="space-y-3">
-                      {scheme.required_documents.map((item: string, idx: number) => (
-                        <li key={idx} className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                          <FaFileContract className="text-[#14B8A6] shrink-0 mt-0.5 h-4 w-4" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="pt-4 border-t border-slate-100">
-                      <Button
-                        variant="accent"
-                        onClick={() => navigate(`/document-verification/${scheme._id}`, { state: scheme })}
-                        className="w-full"
-                      >
-                        Verify Uploaded Documents with AI
-                      </Button>
-                    </div>
+                <DocumentProgress schemeId={scheme._id} requiredDocuments={scheme.required_documents} />
+                
+                {scheme.required_documents && scheme.required_documents.length > 0 && (
+                  <div className="pt-4 border-t border-slate-100">
+                    <Button
+                      variant="accent"
+                      onClick={() => navigate(`/document-verification/${scheme._id}`, { state: scheme })}
+                      className="w-full"
+                    >
+                      Verify Uploaded Documents with AI
+                    </Button>
                   </div>
-                ) : (
-                  <p className="text-sm text-slate-400 font-medium">No documents required.</p>
                 )}
               </div>
             )}
@@ -280,7 +302,11 @@ export default function SchemeDetail() {
             {/* AI EXPLANATION TAB */}
             {activeTab === "explanation" && (
               <div className="space-y-6">
-                <SectionHeader title="RAG Verification Rationale" />
+                <div className="flex justify-between items-center">
+                  <SectionHeader title="RAG Verification Rationale" />
+                  <ReportIncorrect schemeId={scheme._id} fieldName="AI Explanation" />
+                </div>
+                <AITransparencyBadge />
                 {loadingReason ? (
                   <div className="space-y-3">
                     <Skeleton variant="text" className="w-4/5" />
@@ -288,14 +314,23 @@ export default function SchemeDetail() {
                     <Skeleton variant="text" className="w-5/6" />
                   </div>
                 ) : (
-                  <ul className="space-y-3">
-                    {reasons.map((reason, index) => (
-                      <li key={index} className="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                        <span className="text-[#22C55E] shrink-0">✔</span>
-                        <span>{reason}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul className="space-y-3">
+                      {reasons.map((reason, index) => (
+                        <li key={index} className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                          <span className="text-[#22C55E] shrink-0">✔</span>
+                          <span>{reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <SourceCitation 
+                      sourceName="Scheme Eligibility Rules" 
+                      sourceText={Object.entries(scheme.eligibility_rules || {})
+                        .filter(([_, v]) => v !== null && v !== undefined)
+                        .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${Array.isArray(v) ? v.join(", ") : v}`)
+                        .join(" | ")} 
+                    />
+                  </>
                 )}
               </div>
             )}
@@ -358,16 +393,7 @@ export default function SchemeDetail() {
               Ask AI Copilot
             </Button>
             {scheme.official_link && (
-              <a
-                href={scheme.official_link}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full"
-              >
-                <Button variant="secondary" className="w-full">
-                  Visit Official Government Application Portal
-                </Button>
-              </a>
+              <OfficialPortalCTA url={scheme.official_portal_url || scheme.official_link} className="w-full sm:w-auto" />
             )}
           </div>
 

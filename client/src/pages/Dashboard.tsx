@@ -10,11 +10,11 @@ import PageContainer from "../components/layout/PageContainer";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
-import StatCard from "../components/ui/StatCard";
 import SectionHeader from "../components/ui/SectionHeader";
 import Timeline from "../components/ui/Timeline";
 import EmptyState from "../components/ui/EmptyState";
-import Reveal from "../components/effects/Reveal";
+import HouseholdMatchSummary from "../components/ui/HouseholdMatchSummary";
+import BenefitSummaryCard from "../components/ui/BenefitSummaryCard";
 import { getApplicationScore } from "../services/applicationScoreApi";
 import { getProfile } from "../services/profileApi";
 
@@ -35,13 +35,6 @@ interface MatchItem {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const [stats, setStats] = useState({
-    matched: 0,
-    simulations: 0,
-    drafts: 0,
-    profileUpdated: "Today",
-  });
 
   const [recentDrafts, setRecentDrafts] = useState<DraftItem[]>([]);
   const [recentMatches, setRecentMatches] = useState<MatchItem[]>([]);
@@ -66,21 +59,14 @@ export default function Dashboard() {
     );
     setRecentMatches(matches.slice(0, 3)); // show top 3
 
-    const simulations = Number(
-      localStorage.getItem("simulationCount") ?? "0"
-    );
+    // Simulations stat handled elsewhere
 
     const drafts: DraftItem[] = JSON.parse(
       localStorage.getItem("generatedDrafts") || "[]"
     );
     setRecentDrafts(drafts.slice(-3).reverse()); // show latest 3
 
-    setStats({
-      matched: matches.length,
-      simulations,
-      drafts: drafts.length,
-      profileUpdated: new Date().toLocaleDateString(),
-    });
+    // Stats are now managed by BenefitSummaryCard
   }, []);
 
   useEffect(() => {
@@ -167,38 +153,8 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              <Reveal index={0}>
-                <StatCard
-                  title="Matched Schemes"
-                  value={stats.matched}
-                  description="Active qualifications"
-                />
-              </Reveal>
-              <Reveal index={1}>
-                <StatCard
-                  title="Simulations Run"
-                  value={stats.simulations}
-                  description="Hypothetical logs"
-                />
-              </Reveal>
-              <Reveal index={2}>
-                <StatCard
-                  title="Drafts Prepped"
-                  value={stats.drafts}
-                  description="Saved copy logs"
-                />
-              </Reveal>
-              <Reveal index={3}>
-                <StatCard
-                  title="Profile Status"
-                  value="Verified"
-                  description={`Synced ${stats.profileUpdated}`}
-                />
-              </Reveal>
-            </div>
-
+            {/* Benefit Summary Section */}
+            <BenefitSummaryCard />
             {/* Content Row: Left Activities, Right Actions */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               
@@ -294,6 +250,10 @@ export default function Dashboard() {
                   )}
                 </div>
               </Card>
+            </div>
+            {/* Household Matching Summary */}
+            <div className="pt-2">
+              <HouseholdMatchSummary />
             </div>
 
             {/* Recent Matches Section */}

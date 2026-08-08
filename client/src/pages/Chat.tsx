@@ -24,6 +24,7 @@ import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import SectionHeader from "../components/ui/SectionHeader";
 import EmptyState from "../components/ui/EmptyState";
+import AITransparencyBadge from "../components/ui/AITransparencyBadge";
 import {
   getChatSessions,
   getChatMessages,
@@ -370,6 +371,12 @@ export default function Chat() {
                                     <button onClick={() => handleVoicePlayback(m.text)} className="hover:text-slate-600 transition flex items-center gap-0.5"><FaVolumeUp /> Speech</button>
                                     <button onClick={() => handleCopyText(m.text)} className="hover:text-slate-600 transition flex items-center gap-0.5"><FaCopy /> Copy</button>
                                   </div>
+                                </div>
+                              )}
+                              
+                              {isBot && (
+                                <div className="mt-2">
+                                  <AITransparencyBadge />
                                 </div>
                               )}
                             </div>

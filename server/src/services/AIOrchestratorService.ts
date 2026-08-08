@@ -200,6 +200,26 @@ Verify the details and proceed with CSC offline portal submission.
       return Array(768).fill(0.01);
     }
 
+    if (taskType === "enrich-examples") {
+      return `[
+        "✅ Kamla Devi, 45, farmer in Uttar Pradesh. Eligible because occupation is farmer and income is within limits.",
+        "❌ Rajesh Kumar, 35, government employee in Delhi. Not eligible because scheme is for rural farmers only."
+      ]`;
+    }
+
+    if (taskType === "enrich-mistakes") {
+      return `{
+        "common_mistakes": [
+          "Applying without an Aadhaar-linked bank account",
+          "Uploading expired income certificates"
+        ],
+        "practical_notes": [
+          "Make sure your name matches exactly across Aadhaar and bank passbook",
+          "Verification usually takes 15-30 days at the block level"
+        ]
+      }`;
+    }
+
     return "Mock demo response.";
   }
 
@@ -255,6 +275,12 @@ Verify the details and proceed with CSC offline portal submission.
           dark_image: false, glare: false, unreadable_text: false, rotation: false, partial_scan: false
         }
       };
+    }
+    if (taskType === "enrich-examples") {
+      return "[]";
+    }
+    if (taskType === "enrich-mistakes") {
+      return '{"common_mistakes":[], "practical_notes":[]}';
     }
     return "Fallback response due to system rate limits.";
   }

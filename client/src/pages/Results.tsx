@@ -16,8 +16,10 @@ import ReasoningOverlay from "../components/ui/ReasoningOverlay";
 import SectionHeader from "../components/ui/SectionHeader";
 import NearbyHelpPanel from "../components/ui/NearbyHelpPanel";
 import BenefitGapCard from "../components/ui/BenefitGapCard";
+import HouseholdMatchSummary from "../components/ui/HouseholdMatchSummary";
 import DeadlineBadge from "../components/ui/DeadlineBadge";
 import StoryBadge from "../components/ui/StoryBadge";
+import AITransparencyBadge from "../components/ui/AITransparencyBadge";
 import { parseBenefitImpact } from "../utils/benefitParser";
 import { getApplicationScore } from "../services/applicationScoreApi";
 
@@ -226,6 +228,7 @@ export default function Results() {
                 alreadyReceiving={20000}
                 matchedCount={matches.length}
               />
+              <HouseholdMatchSummary />
             </div>
           )}
 
@@ -378,13 +381,16 @@ export default function Results() {
 
                         {/* AI explanation of Why You Match */}
                         <div className="bg-[#14B8A6]/5 rounded-xl border border-[#14B8A6]/10 p-4">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-[#0D9488] mb-1.5 flex items-center gap-1.5">
-                            <span className="h-1.5 w-1.5 bg-[#14B8A6] rounded-full inline-block" />
-                            AI Analysis: Why you match
-                          </h4>
-                          <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-[#0D9488] mb-1.5 flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 bg-[#14B8A6] rounded-full inline-block" />
+                              AI Analysis: Why you match
+                            </h4>
+                          </div>
+                          <p className="text-xs text-slate-600 font-medium leading-relaxed mb-3">
                             {scheme.summary || "You meet the basic qualification criteria for this scheme."}
                           </p>
+                          <AITransparencyBadge />
                         </div>
 
                         {/* Verified Parameters Checklist */}

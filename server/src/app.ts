@@ -24,6 +24,10 @@ import chatRoutes from "./routes/chat";
 import digiLockerRoutes from "./routes/digiLocker";
 import adminRoutes from "./routes/admin";
 import communicationRoutes from "./routes/communication";
+import correctionRoutes from "./routes/corrections";
+import dashboardRoutes from "./routes/dashboard";
+import pipelineRoutes from "./routes/pipeline";
+import { initScheduler } from "./scripts/scheduler";
 
 dotenv.config();
 
@@ -67,4 +71,11 @@ app.use("/chat", chatRoutes);
 app.use("/digilocker", digiLockerRoutes);
 app.use("/admin", adminRoutes);
 app.use("/communication", communicationRoutes);
+app.use("/corrections", correctionRoutes);
+app.use("/dashboard", dashboardRoutes);
+app.use("/pipeline", pipelineRoutes);
+
+// Initialize background jobs
+initScheduler();
+
 export default app;

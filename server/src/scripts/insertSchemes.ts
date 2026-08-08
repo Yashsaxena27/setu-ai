@@ -74,6 +74,11 @@ async function seedSchemes() {
         website,
         officeHours,
         supportLanguages,
+        freshness_status: "unverified",
+        official_portal_url: scheme.official_link || null,
+        is_active: true,
+        source_providers: ["data.gov.in"],
+        confidence_score: 80,
       };
     });
 

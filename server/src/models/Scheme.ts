@@ -24,7 +24,34 @@ const schemeSchema = new mongoose.Schema(
 
     last_verified_date: Date,
 
+    freshness_status: {
+      type: String,
+      enum: ["fresh", "stale", "unverified"],
+      default: "unverified",
+    },
+
+    official_portal_url: String,
+
+    is_active: {
+      type: Boolean,
+      default: true,
+    },
+
+    source_providers: [String],
+
+    confidence_score: {
+      type: Number,
+      min: 0,
+      max: 100,
+    },
+
+    content_hash: String,
+
     summary_text: String,
+    
+    eligibility_examples: [String],
+    common_mistakes: [String],
+    practical_notes: [String],
 
     embedding: [Number],
 

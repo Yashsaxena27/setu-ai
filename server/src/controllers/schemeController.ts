@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Scheme from "../models/Scheme";
+import { enrichScheme } from "../services/SchemeEnrichmentService";
 
 export const getAllSchemes = async (_: Request, res: Response) => {
   try {
@@ -21,6 +22,11 @@ export const getSchemeById = async (req: Request, res: Response) => {
       return res.status(404).json({
         message: "Scheme not found",
       });
+    }
+
+    if (!scheme.eligibility_examples || scheme.eligibility_examples.length === 0) {
+      // Trigger enrichment asynchronously
+      enrichScheme(scheme._id.toString()).catch(e => console.error("Enrichment error:", e));
     }
 
     res.json(scheme);

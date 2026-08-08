@@ -12,6 +12,7 @@ import {
   FaTrash,
   FaDownload,
   FaMapMarkedAlt,
+  FaServer,
 } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
@@ -38,10 +39,13 @@ import {
 } from "../services/adminApi";
 import { getMatches } from "../services/match";
 
+import CorrectionQueue from "../components/admin/CorrectionQueue";
+import PipelineManager from "../components/admin/PipelineManager";
+
 export default function AdminPortal() {
   const navigate = useNavigate();
 
-  // Navigation tabs: "dashboard" | "schemes" | "users" | "notifications" | "audit"
+  // Navigation tabs: "dashboard" | "schemes" | "users" | "notifications" | "audit" | "corrections" | "pipeline"
   const [activeTab, setActiveTab] = useState<string>("dashboard");
 
   // Fetch States
@@ -268,24 +272,43 @@ export default function AdminPortal() {
 
               <button
                 onClick={() => setActiveTab("notifications")}
-                className={`w-full p-3 text-left rounded-2xl text-xs font-bold transition flex items-center gap-3 ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                   activeTab === "notifications"
-                    ? "bg-[#14B8A6]/15 text-[#0F172A]"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-[#0F172A]"
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-500 hover:bg-slate-100"
                 }`}
               >
-                <FaBullhorn /> Broadcast Center
+                <FaBullhorn className="inline mr-3 text-lg" /> Broadcasts
               </button>
-
+              <button
+                onClick={() => setActiveTab("corrections")}
+                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                  activeTab === "corrections"
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-500 hover:bg-slate-100"
+                }`}
+              >
+                <FaShieldAlt className="inline mr-3 text-lg" /> Corrections
+              </button>
               <button
                 onClick={() => setActiveTab("audit")}
-                className={`w-full p-3 text-left rounded-2xl text-xs font-bold transition flex items-center gap-3 ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                   activeTab === "audit"
-                    ? "bg-[#14B8A6]/15 text-[#0F172A]"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-[#0F172A]"
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-500 hover:bg-slate-100"
                 }`}
               >
-                <FaShieldAlt /> System Audit Logs
+                <FaShieldAlt className="inline mr-3 text-lg" /> System Audit Logs
+              </button>
+              <button
+                onClick={() => setActiveTab("pipeline")}
+                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                  activeTab === "pipeline"
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-500 hover:bg-slate-100"
+                }`}
+              >
+                <FaServer className="inline mr-3 text-lg" /> Data Pipeline
               </button>
             </div>
 
@@ -520,7 +543,17 @@ export default function AdminPortal() {
                 </Card>
               )}
 
-              {/* TAB 5: SYSTEM AUDIT LOGS */}
+              {/* CORRECTIONS TAB */}
+              {activeTab === "corrections" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <SectionHeader title="User Correction Reports" className="!mb-0" />
+                  </div>
+                  <CorrectionQueue />
+                </div>
+              )}
+
+              {/* AUDIT TAB */}
               {activeTab === "audit" && (
                 <div className="space-y-6">
                   
@@ -560,6 +593,14 @@ export default function AdminPortal() {
                       ))}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* PIPELINE TAB */}
+              {activeTab === "pipeline" && (
+                <div className="space-y-6">
+                  <SectionHeader title="Data Pipeline Integration" />
+                  <PipelineManager />
                 </div>
               )}
 
