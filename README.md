@@ -38,7 +38,7 @@
 - [Multi-Channel Access](#multi-channel-access)
 - [Security & Privacy](#security--privacy)
 - [Future Roadmap](#future-roadmap)
-- [Team](#team)
+- [Creator](#creator)
 - [License](#license)
 
 ---
@@ -52,7 +52,7 @@ It uses a **Hybrid Retrieval-Augmented Generation (RAG)** engine — combining s
 Beyond matching, Setu AI provides an end-to-end application journey: document verification via AI-powered OCR, a personalized 8-step roadmap, auto-generated application drafts, and multi-channel access through WhatsApp, SMS, Voice IVR, and Email.
 
 **Hackathon**: Lenovo Leap Hackathon 2026 — Civic-Tech & AI Track  
-**Creators**: Sparsh Gahoi & Yash Saxena
+**Creator**: Yash Saxena
 
 ---
 
@@ -360,11 +360,10 @@ All four channels feed into the same matching engine and log every interaction i
 
 ---
 
-## Team
+## Creator
 
 Built for **Lenovo Leap Hackathon 2026** by:
 
-- **Sparsh Gahoi** — [LinkedIn](https://www.linkedin.com/in/sparsh-gahoi-05a212342/)
 - **Yash Saxena** — [LinkedIn](https://www.linkedin.com/in/yash-saxena-21490a308/)
 
 ---
