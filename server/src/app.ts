@@ -30,27 +30,40 @@ import pipelineRoutes from "./routes/pipeline";
 import userApplicationsRoutes from "./routes/userApplications";
 import intelligenceRoutes from "./routes/intelligence";
 import { initScheduler } from "./scripts/scheduler";
+import { errorHandler } from "./middleware/errorHandler";
+import { generalLimiter, aiLimiter } from "./middleware/rateLimiter";
+import { env } from "./config/env";
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
+// Security Middleware
+const allowedOrigin = env.CLIENT_URL || "http://localhost:5173";
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigin.includes(",") ? allowedOrigin.split(",").map(s => s.trim()) : allowedOrigin,
     credentials: true,
   })
 );
 
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(generalLimiter);
 
 // Parse JSON requests
-app.use(express.json());
+app.use(express.json({ limit: "15mb" }));
 
 // Parse Twilio webhook form data
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
+
+// AI Rate Limiter for intensive AI endpoints
+app.use("/match", aiLimiter);
+app.use("/draft", aiLimiter);
+app.use("/explain", aiLimiter);
+app.use("/intelligence", aiLimiter);
+app.use("/simulator", aiLimiter);
+app.use("/chat", aiLimiter);
 
 // Routes
 app.use("/auth", authRoutes);
@@ -78,6 +91,9 @@ app.use("/dashboard", dashboardRoutes);
 app.use("/pipeline", pipelineRoutes);
 app.use("/applications", userApplicationsRoutes);
 app.use("/intelligence", intelligenceRoutes);
+
+// Centralized error handler
+app.use(errorHandler);
 
 // Initialize background jobs
 initScheduler();

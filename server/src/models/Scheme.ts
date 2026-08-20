@@ -92,10 +92,11 @@ const schemeSchema = new mongoose.Schema(
   }
 );
 
-schemeSchema.index({
-  state_applicability: 1,
-  category: 1,
-  level: 1,
-});
+// High-Performance Compound & Single-field Indexes
+schemeSchema.index({ state_applicability: 1, is_active: 1 });
+schemeSchema.index({ category: 1, level: 1 });
+schemeSchema.index({ scheme_name: "text", summary_text: "text" });
+schemeSchema.index({ "eligibility_rules.income_limit": 1 });
+schemeSchema.index({ "eligibility_rules.min_age": 1, "eligibility_rules.max_age": 1 });
 
 export default mongoose.model("Scheme", schemeSchema);

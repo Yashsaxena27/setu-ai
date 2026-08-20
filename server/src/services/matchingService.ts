@@ -61,7 +61,25 @@ Education: ${profile.education ?? ""}
 
   // Fallback if vector search failed or returned empty
   if (!candidates || candidates.length === 0) {
-    candidates = await Scheme.find({}).lean();
+    const stateFilter = userState
+      ? {
+          $or: [
+            { state_applicability: { $exists: false } },
+            { state_applicability: { $size: 0 } },
+            { state_applicability: { $in: [new RegExp(`^${userState}$`, "i"), "All", "all", "All India", "Pan India"] } },
+          ],
+        }
+      : {};
+
+    candidates = await Scheme.find({
+      is_active: { $ne: false },
+      ...stateFilter,
+    }).lean();
+
+    // If state filter returned 0, retrieve all active schemes
+    if (!candidates || candidates.length === 0) {
+      candidates = await Scheme.find({ is_active: { $ne: false } }).lean();
+    }
   }
 
   const matches: any[] = [];

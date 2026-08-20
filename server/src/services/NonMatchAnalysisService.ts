@@ -1,5 +1,14 @@
 export interface NonMatchReason {
-  reasonCode: "AGE_MISMATCH" | "INCOME_LIMIT_EXCEEDED" | "STATE_RESTRICTED" | "OCCUPATION_MISMATCH" | "GENDER_MISMATCH" | "OTHER";
+  reasonCode:
+    | "AGE_MISMATCH"
+    | "INCOME_LIMIT_EXCEEDED"
+    | "STATE_RESTRICTED"
+    | "OCCUPATION_MISMATCH"
+    | "GENDER_MISMATCH"
+    | "CASTE_MISMATCH"
+    | "DISABILITY_REQUIRED"
+    | "MARITAL_STATUS_MISMATCH"
+    | "OTHER";
   field: string;
   actualValue: string | number;
   requiredValue: string | number;
@@ -17,6 +26,9 @@ export class NonMatchAnalysisService {
     const userState = (profile.state || "").trim().toLowerCase();
     const userOccupation = (profile.occupation || "").trim().toLowerCase();
     const userGender = (profile.gender || "").trim().toLowerCase();
+    const userCaste = (profile.caste || profile.social_category || "").trim().toLowerCase();
+    const userDisability = Boolean(profile.disability === true || profile.isDisability === true || String(profile.disability).toLowerCase() === "yes");
+    const userMarital = (profile.marital_status || profile.maritalStatus || "").trim().toLowerCase();
 
     // 1. Age Filter
     if (userAge > 0) {
@@ -43,7 +55,7 @@ export class NonMatchAnalysisService {
 
     // 2. State Filter
     if (userState && scheme.state_applicability && Array.isArray(scheme.state_applicability)) {
-      const states = scheme.state_applicability.map((s: string) => s.toLowerCase());
+      const states = scheme.state_applicability.map((s: string) => s.toLowerCase().trim());
       const isAll = states.includes("all") || states.includes("all india") || states.includes("pan india");
       if (!isAll && !states.includes(userState)) {
         reasons.push({
@@ -72,14 +84,14 @@ export class NonMatchAnalysisService {
 
     // 4. Occupation Filter
     if (rules.occupation && typeof rules.occupation === "string") {
-      const ruleOcc = rules.occupation.toLowerCase();
-      if (ruleOcc !== "any" && ruleOcc !== "citizen" && userOccupation) {
+      const ruleOcc = rules.occupation.toLowerCase().trim();
+      if (ruleOcc !== "any" && ruleOcc !== "citizen" && ruleOcc !== "all" && userOccupation) {
         const isDirectMatch = ruleOcc.includes(userOccupation) || userOccupation.includes(ruleOcc);
-        const isFarmerMatch = userOccupation.includes("farmer") && (ruleOcc.includes("farm") || ruleOcc.includes("agri") || ruleOcc.includes("kisan"));
-        const isStudentMatch = userOccupation.includes("student") && (ruleOcc.includes("student") || ruleOcc.includes("school") || ruleOcc.includes("scholarship"));
+        const isFarmerMatch = (userOccupation.includes("farmer") || userOccupation.includes("kisan")) && (ruleOcc.includes("farm") || ruleOcc.includes("agri") || ruleOcc.includes("kisan"));
+        const isStudentMatch = (userOccupation.includes("student") || userOccupation.includes("scholar")) && (ruleOcc.includes("student") || ruleOcc.includes("school") || ruleOcc.includes("scholarship") || ruleOcc.includes("education"));
         const isWomenMatch = (userOccupation.includes("woman") || userOccupation.includes("women") || userOccupation.includes("homemaker")) && (ruleOcc.includes("woman") || ruleOcc.includes("women") || ruleOcc.includes("female"));
         const isUnemployedMatch = userOccupation.includes("unemployed") && (ruleOcc.includes("unemployed") || ruleOcc.includes("youth"));
-        const isBusinessMatch = (userOccupation.includes("business") || userOccupation.includes("self employed")) && (ruleOcc.includes("business") || ruleOcc.includes("entrepreneur") || ruleOcc.includes("msme"));
+        const isBusinessMatch = (userOccupation.includes("business") || userOccupation.includes("self employed") || userOccupation.includes("shopkeeper")) && (ruleOcc.includes("business") || ruleOcc.includes("entrepreneur") || ruleOcc.includes("msme"));
 
         const isMatched = isDirectMatch || isFarmerMatch || isStudentMatch || isWomenMatch || isUnemployedMatch || isBusinessMatch;
 
@@ -96,8 +108,8 @@ export class NonMatchAnalysisService {
     }
     
     // 5. Gender Filter (if any)
-    if (rules.gender && typeof rules.gender === "string" && rules.gender.toLowerCase() !== "any") {
-      const ruleGender = rules.gender.toLowerCase();
+    if (rules.gender && typeof rules.gender === "string" && rules.gender.toLowerCase() !== "any" && rules.gender.toLowerCase() !== "all") {
+      const ruleGender = rules.gender.toLowerCase().trim();
       if (userGender && userGender !== ruleGender) {
         reasons.push({
           reasonCode: "GENDER_MISMATCH",
@@ -105,6 +117,45 @@ export class NonMatchAnalysisService {
           actualValue: profile.gender || "Not specified",
           requiredValue: rules.gender,
           explanation: `This scheme is restricted to ${rules.gender} applicants.`,
+        });
+      }
+    }
+
+    // 6. Caste / Social Category Filter
+    if (rules.caste && typeof rules.caste === "string" && rules.caste.toLowerCase() !== "any" && rules.caste.toLowerCase() !== "all") {
+      const ruleCaste = rules.caste.toLowerCase().trim();
+      if (userCaste && !ruleCaste.includes(userCaste) && !userCaste.includes(ruleCaste)) {
+        reasons.push({
+          reasonCode: "CASTE_MISMATCH",
+          field: "Social Category",
+          actualValue: profile.caste || "Not specified",
+          requiredValue: rules.caste,
+          explanation: `This scheme is designated for ${rules.caste} category.`,
+        });
+      }
+    }
+
+    // 7. Disability Requirement Filter
+    if (rules.disability_required === true && !userDisability) {
+      reasons.push({
+        reasonCode: "DISABILITY_REQUIRED",
+        field: "Disability Status",
+        actualValue: "No disability declared",
+        requiredValue: "Persons with Disabilities (PwD)",
+        explanation: `This scheme specifically supports Persons with Disabilities.`,
+      });
+    }
+
+    // 8. Marital Status Filter
+    if (rules.marital_status && typeof rules.marital_status === "string" && rules.marital_status.toLowerCase() !== "any") {
+      const ruleMarital = rules.marital_status.toLowerCase().trim();
+      if (userMarital && userMarital !== ruleMarital) {
+        reasons.push({
+          reasonCode: "MARITAL_STATUS_MISMATCH",
+          field: "Marital Status",
+          actualValue: profile.marital_status || profile.maritalStatus || "Not specified",
+          requiredValue: rules.marital_status,
+          explanation: `This scheme is specifically for ${rules.marital_status} applicants.`,
         });
       }
     }

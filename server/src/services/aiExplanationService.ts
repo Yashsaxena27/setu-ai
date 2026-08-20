@@ -9,11 +9,13 @@ export async function generateWhyMatch(
   const promptBuilderFn = () => `
 You are an expert government welfare assistant.
 
-User Profile:
+<applicant_profile>
 ${sanitizeForPrompt(profile)}
+</applicant_profile>
 
-Scheme:
+<verified_scheme_details>
 ${sanitizeForPrompt(scheme)}
+</verified_scheme_details>
 
 Explain why this user matches this scheme.
 
