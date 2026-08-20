@@ -19,16 +19,22 @@ export const updateProfile = async (
   res: Response
 ) => {
   try {
+    // Prevent unauthorized role privilege escalation via profile update
+    const updateData = { ...req.body };
+    delete updateData.role;
+    delete updateData.password;
+    delete updateData._id;
+
     const updated = await User.findByIdAndUpdate(
       req.userId,
-      req.body,
+      updateData,
       {
         new: true,
       }
     ).select("-password");
 
-    res.json(updated);
+    res.json({ success: true, user: updated });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update profile" });
+    res.status(500).json({ success: false, message: "Failed to update profile" });
   }
 };

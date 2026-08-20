@@ -9,28 +9,15 @@
   "main": "dist/server.js",
  
   "scripts": {
- 
-   
-  "test": "ts-node src/scripts/testEligibilityEngine.ts",
- 
-   
-  "embeddings": "ts-node src/scripts/generateEmbeddings.ts",
- 
-   
-  "seed": "ts-node src/scripts/insertSchemes.ts",
- 
-   
-  "dev": "ts-node-dev --respawn src/server.ts",
- 
-   
-  "build": "tsc",
- 
-   
-  "start": "node dist/server.js",
- 
-   
-  "test-adapters": "ts-node src/scripts/testChannelAdapters.ts"
- 
+    "test": "ts-node src/scripts/testEligibilityEngine.ts && ts-node src/scripts/runRagEvaluation.ts",
+    "test:rag": "ts-node src/scripts/runRagEvaluation.ts",
+    "benchmark:rag": "ts-node src/scripts/runRagBenchmark.ts",
+    "embeddings": "ts-node src/scripts/generateEmbeddings.ts",
+    "seed": "ts-node src/scripts/insertSchemes.ts",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test-adapters": "ts-node src/scripts/testChannelAdapters.ts"
   },
  
   "keywords": [

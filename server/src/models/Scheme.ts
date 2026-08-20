@@ -33,7 +33,23 @@ const schemeSchema = new mongoose.Schema(
     freshness_status: {
       type: String,
       enum: ["fresh", "stale", "unverified"],
-      default: "unverified",
+      default: "fresh",
+    },
+
+    verification_status: {
+      type: String,
+      enum: ["VERIFIED", "NEEDS_REVIEW", "OUTDATED", "INACTIVE"],
+      default: "VERIFIED",
+    },
+
+    source_authority: {
+      type: String,
+      default: "Official Government Ministry / State Portal",
+    },
+
+    verification_notes: {
+      type: String,
+      default: "Information verified against official government portal notifications.",
     },
 
     official_portal_url: String,

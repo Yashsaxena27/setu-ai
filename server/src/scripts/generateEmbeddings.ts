@@ -6,35 +6,71 @@ import Scheme from "../models/Scheme";
 import { generateEmbedding } from "../services/embeddingService";
 
 async function main() {
-  await mongoose.connect(process.env.MONGO_URI!);
+  console.log("================================================================================");
+  console.log("             SETU AI: PRODUCTION EMBEDDING GENERATION & POPULATION              ");
+  console.log("================================================================================");
+  
+  await mongoose.connect(process.env.MONGO_URI!, { serverSelectionTimeoutMS: 8000 });
+  console.log("Connected to MongoDB Atlas.");
 
-  console.log("Mongo Connected");
+  const schemes = await Scheme.find({});
+  console.log(`Found ${schemes.length} schemes to process.\n`);
 
-  const schemes = await Scheme.find();
+  let updated = 0;
+  let failed = 0;
 
-  for (const scheme of schemes) {
-    const text = `
-${scheme.scheme_name}
+  for (let i = 0; i < schemes.length; i++) {
+    const scheme = schemes[i];
+    const rules = scheme.eligibility_rules || {};
 
-${scheme.category}
+    // Build rich semantic document for dense indexing
+    const textToEmbed = `
+Scheme Name: ${scheme.scheme_name}
+Category: ${scheme.category}
+Level: ${scheme.level || "Central"}
+Target Audience: ${rules.occupation || "All Citizens"}
+Age Eligibility: ${rules.min_age || 0} to ${rules.max_age || 100} years
+Income Limit: ${rules.income_limit ? `Up to ₹${rules.income_limit}` : "No income limit"}
+Applicable States: ${scheme.state_applicability?.join(", ") || "All India"}
+Summary: ${scheme.summary_text || ""}
+Key Benefits: ${scheme.benefits?.join(". ") || ""}
+Tags: ${scheme.tags?.join(", ") || ""}
+`.trim();
 
-${scheme.summary_text}
+    process.stdout.write(`[${(i + 1).toString().padStart(2, "0")}/${schemes.length}] Generating embedding for: ${(scheme.scheme_name || "Unnamed").padEnd(50)} `);
 
-${scheme.tags?.join(", ")}
-`;
+    try {
+      const embedding = await generateEmbedding(textToEmbed);
+      if (embedding && embedding.length > 0) {
+        scheme.embedding = embedding;
+        await scheme.save();
+        updated++;
+        console.log(`✅ [${embedding.length} dim]`);
+      } else {
+        failed++;
+        console.log(`❌ [Empty]`);
+      }
+    } catch (err: any) {
+      failed++;
+      console.log(`❌ Error: ${err.message}`);
+    }
 
-    console.log("Embedding:", scheme.scheme_name);
-
-    const embedding = await generateEmbedding(text);
-
-    scheme.embedding = embedding;
-
-    await scheme.save();
+    // Gentle pacing to respect Gemini rate limits
+    await new Promise((r) => setTimeout(r, 200));
   }
 
-  console.log("Done");
+  console.log("\n================================================================================");
+  console.log(`Successfully embedded ${updated}/${schemes.length} schemes in MongoDB Atlas.`);
+  if (failed > 0) {
+    console.log(`Failed embeddings: ${failed}`);
+  }
+  console.log("================================================================================");
 
+  await mongoose.disconnect();
   process.exit(0);
 }
 
-main();
+main().catch((err) => {
+  console.error("Fatal Error:", err);
+  process.exit(1);
+});

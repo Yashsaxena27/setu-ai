@@ -7,7 +7,7 @@ export const matchSchemes = async (
   res: Response
 ) => {
   try {
-    const { matches, nonMatches } = await findMatchingSchemesWithReasons(req.body);
+    const { matches, nonMatches, noResultDiagnosis } = await findMatchingSchemesWithReasons(req.body);
 
     const response = formatMatchResponse(matches);
 
@@ -16,6 +16,7 @@ export const matchSchemes = async (
       total: response.length,
       matches: response,
       nonMatches,
+      ...(noResultDiagnosis ? { noResultDiagnosis } : {}),
     });
   } catch (err: any) {
     console.error("===== MATCH ERROR =====");

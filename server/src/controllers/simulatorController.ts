@@ -25,71 +25,13 @@ function parseBenefitAmount(benefits: string[]): number {
   return maxMonetary;
 }
 
+import { NonMatchAnalysisService } from "../services/NonMatchAnalysisService";
+
 function checkEligibilityDetail(profile: any, scheme: any) {
-  const userIncome = Number(profile.income || profile.annual_income || 0);
-  const userAge = Number(profile.age || 0);
-  const userState = (profile.state || "").trim();
-  const userOccupation = (profile.occupation || "").trim().toLowerCase();
-
-  const rules = scheme.eligibility_rules || {};
-  const reasons: string[] = [];
-
-  // 1. Age Filter
-  if (userAge > 0) {
-    const minAge = rules.min_age != null ? Number(rules.min_age) : 0;
-    const maxAge = rules.max_age != null ? Number(rules.max_age) : 120;
-    if (userAge < minAge || userAge > maxAge) {
-      reasons.push(`Age ${userAge} falls outside required ${minAge}-${maxAge} range`);
-    }
-  }
-
-  // 2. State Filter
-  if (userState && scheme.state_applicability && Array.isArray(scheme.state_applicability)) {
-    const states = scheme.state_applicability.map((s: string) => s.toLowerCase());
-    const isAll = states.includes("all") || states.includes("all india") || states.includes("pan india");
-    if (!isAll && !states.includes(userState.toLowerCase())) {
-      reasons.push(`State ${userState} is not eligible`);
-    }
-  }
-
-  // 3. Income Filter
-  if (rules.income_limit != null && userIncome > 0) {
-    const limit = Number(rules.income_limit);
-    if (limit > 0 && userIncome > limit) {
-      reasons.push(`Income ₹${userIncome.toLocaleString()} exceeds threshold of ₹${limit.toLocaleString()}`);
-    }
-  }
-
-  // 4. Occupation Filter
-  if (rules.occupation && typeof rules.occupation === "string") {
-    const ruleOcc = rules.occupation.toLowerCase();
-    if (ruleOcc !== "any" && ruleOcc !== "citizen" && userOccupation) {
-      const isDirectMatch = ruleOcc.includes(userOccupation) || userOccupation.includes(ruleOcc);
-      const isFarmerMatch =
-        userOccupation.includes("farmer") &&
-        (ruleOcc.includes("farm") || ruleOcc.includes("agri") || ruleOcc.includes("kisan") || ruleOcc.includes("crop") || ruleOcc.includes("pacs") || ruleOcc.includes("fpo"));
-      const isStudentMatch =
-        userOccupation.includes("student") &&
-        (ruleOcc.includes("student") || ruleOcc.includes("school") || ruleOcc.includes("scholarship") || ruleOcc.includes("child") || ruleOcc.includes("girl") || ruleOcc.includes("education") || ruleOcc.includes("youth"));
-      const isWomenMatch =
-        (userOccupation.includes("woman") || userOccupation.includes("women") || userOccupation.includes("homemaker")) &&
-        (ruleOcc.includes("woman") || ruleOcc.includes("women") || ruleOcc.includes("female") || ruleOcc.includes("girl") || ruleOcc.includes("mother") || ruleOcc.includes("lady") || ruleOcc.includes("shg") || ruleOcc.includes("self help"));
-      const isUnemployedMatch =
-        userOccupation.includes("unemployed") &&
-        (ruleOcc.includes("unemployed") || ruleOcc.includes("youth") || ruleOcc.includes("seeker"));
-      const isBusinessMatch =
-        (userOccupation.includes("business") || userOccupation.includes("self employed") || userOccupation.includes("private")) &&
-        (ruleOcc.includes("business") || ruleOcc.includes("entrepreneur") || ruleOcc.includes("msme") || ruleOcc.includes("self-employed") || ruleOcc.includes("trader") || ruleOcc.includes("artisan"));
-
-      if (!(isDirectMatch || isFarmerMatch || isStudentMatch || isWomenMatch || isUnemployedMatch || isBusinessMatch)) {
-        reasons.push(`Occupation is restricted to: ${rules.occupation}`);
-      }
-    }
-  }
-
+  const classification = NonMatchAnalysisService.classifyEligibility(profile, scheme);
   return {
-    eligible: reasons.length === 0,
-    reasons,
+    eligible: classification.isEligible,
+    reasons: classification.reasons.map((r) => r.explanation),
   };
 }
 
