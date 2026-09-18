@@ -16,6 +16,10 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') {
+    return; // Let the browser handle non-GET requests natively
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {

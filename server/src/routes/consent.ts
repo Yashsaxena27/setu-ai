@@ -15,7 +15,8 @@ router.post("/", authMiddleware, async (req: AuthRequest, res) => {
     await user.save();
     res.json({ success: true, message: "Consent updated" });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to update consent" });
+    console.error("Consent error:", error);
+    res.status(500).json({ success: false, message: "Failed to update consent", error: String(error) });
   }
 });
 
