@@ -26,3 +26,16 @@ export function saveProfile(profile: Profile) {
     body: JSON.stringify(profile),
   });
 }
+
+export function saveConsent() {
+  return api("/consent", {
+    method: "POST",
+  });
+}
+
+export function submitLifeEvent(event: string) {
+  return api<any>("/profile/life-event", {
+    method: "POST",
+    body: JSON.stringify({ event }),
+  });
+}

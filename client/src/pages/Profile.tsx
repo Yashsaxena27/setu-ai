@@ -21,6 +21,7 @@ import OccupationInfo from "../components/Profile/steps/OccupationInfo";
 import EducationInfo from "../components/Profile/steps/EducationInfo";
 import ContactInfo from "../components/Profile/steps/ContactInfo";
 import Review from "../components/Profile/steps/Review";
+import ConsentModal from "../components/Profile/ConsentModal";
 
 import { validateStep } from "../utils/validation";
 
@@ -263,6 +264,7 @@ export default function Profile() {
 
   return (
     <main className="min-h-screen bg-[#FAF8F3] font-sans pb-16 md:pb-0">
+      <ConsentModal />
       <Header />
 
       <PageContainer>

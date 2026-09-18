@@ -36,6 +36,10 @@ const Chat = lazy(() => import("../pages/Chat"));
 const AdminPortal = lazy(() => import("../pages/AdminPortal"));
 const Reminders = lazy(() => import("../pages/Reminders"));
 const Settings = lazy(() => import("../pages/Settings"));
+const ApplicationReadiness = lazy(() => import("../pages/ApplicationReadiness"));
+const ApplicationPackage = lazy(() => import("../pages/ApplicationPackage"));
+const LifeEvents = lazy(() => import("../pages/LifeEvents"));
+const MyApplications = lazy(() => import("../pages/MyApplications"));
 
 const RouteSuspenseFallback = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-3" role="status">
@@ -105,9 +109,13 @@ function AnimatedRoutes() {
                 <Route path="/document-verification/:schemeId" element={<DocumentVerification />} />
                 <Route path="/application-roadmap" element={<ApplicationRoadmap />} />
                 <Route path="/application-roadmap/:schemeId" element={<ApplicationRoadmap />} />
+                <Route path="/apply/:schemeId" element={<ApplicationReadiness />} />
+                <Route path="/apply/:schemeId/package" element={<ApplicationPackage />} />
                 <Route path="/scheme-updates" element={<SchemeUpdates />} />
                 <Route path="/family" element={<Family />} />
                 <Route path="/chat" element={<Chat />} />
+                <Route path="/life-events" element={<LifeEvents />} />
+                <Route path="/my-applications" element={<MyApplications />} />
                 <Route element={<AdminRoute />}>
                   <Route path="/admin" element={<AdminPortal />} />
                 </Route>

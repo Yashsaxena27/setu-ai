@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { getExplanation } from "../services/explain";
 import { getApplicationScore } from "../services/applicationScoreApi";
 import { getDeadlineIntelligence } from "../services/intelligenceApi";
-import { FaArrowLeft, FaCheckCircle, FaInfoCircle } from "react-icons/fa";
+import { FaArrowLeft, FaCheckCircle, FaInfoCircle, FaExternalLinkAlt } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -20,14 +20,12 @@ import Reveal from "../components/effects/Reveal";
 import SuccessScoreCard from "../components/ui/SuccessScoreCard";
 import SmartDeadlineBadge from "../components/ui/SmartDeadlineBadge";
 
-import FreshnessBadge from "../components/ui/FreshnessBadge";
 import OfficialPortalCTA from "../components/ui/OfficialPortalCTA";
 import TrustDisclaimer from "../components/ui/TrustDisclaimer";
 import AITransparencyBadge from "../components/ui/AITransparencyBadge";
 import SourceCitation from "../components/ui/SourceCitation";
 import ReportIncorrect from "../components/ui/ReportIncorrect";
 import ActionPlan from "../components/ui/ActionPlan";
-import CorrectionLog from "../components/ui/CorrectionLog";
 import EligibilityExamples from "../components/ui/EligibilityExamples";
 import CommonMistakes from "../components/ui/CommonMistakes";
 import PracticalNotes from "../components/ui/PracticalNotes";
@@ -197,21 +195,39 @@ export default function SchemeDetail() {
               <h1 className="font-serif text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0F172A] leading-tight">
                 {scheme.scheme_name}
               </h1>
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-4 bg-white px-5 py-3.5 rounded-2xl border border-[#0F172A]/5 shadow-soft w-fit">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    AI Match Score
-                  </span>
-                  <span className="text-2xl font-serif font-black text-[#22C55E]">
-                    {scheme.score}%
-                  </span>
-                </div>
-                <FreshnessBadge 
-                  lastVerifiedDate={scheme.last_verified_date || scheme.createdAt || new Date()} 
-                  status={scheme.freshness_status}
-                />
-                <CorrectionLog schemeId={scheme._id} />
-                <ReportIncorrect schemeId={scheme._id} fieldName="General/Header" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <Card className="bg-white border border-[#0F172A]/5 p-5 shadow-sm rounded-xl">
+                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Source & Verification</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm font-medium">
+                      <span className="text-slate-500">Official Source</span>
+                      {scheme.official_link ? (
+                        <a href={scheme.official_link} target="_blank" rel="noreferrer" className="text-[#14B8A6] font-bold hover:underline flex items-center gap-1">
+                          Scheme Portal <FaExternalLinkAlt className="h-3 w-3" />
+                        </a>
+                      ) : (
+                        <span className="text-slate-700">Information provided from scheme sources.</span>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center text-sm font-medium">
+                      <span className="text-slate-500">Last Verified</span>
+                      <span className="text-slate-700 font-bold">{scheme.last_verified_date ? new Date(scheme.last_verified_date).toLocaleDateString() : "Verification date unavailable"}</span>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="bg-white border border-[#0F172A]/5 p-5 shadow-sm rounded-xl">
+                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Trust & Eligibility</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start text-sm font-medium">
+                      <span className="text-slate-500 mr-4">Eligibility</span>
+                      <span className="text-slate-700 text-right">Based on published scheme criteria.</span>
+                    </div>
+                    <div className="flex justify-between items-start text-sm font-medium">
+                      <span className="text-slate-500 mr-4">Application</span>
+                      <span className="text-slate-700 text-right">{scheme.applicationMethods && scheme.applicationMethods.length > 0 ? "External official route / assisted route" : "Route details unavailable"}</span>
+                    </div>
+                  </div>
+                </Card>
               </div>
               <TrustDisclaimer className="mt-4" />
             </div>

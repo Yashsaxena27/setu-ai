@@ -86,16 +86,26 @@ export default function Settings() {
             </div>
           </Card>
 
-          {/* Security status Info */}
-          <Card className="border border-[#0F172A]/5 p-5 bg-[#14B8A6]/5 flex items-start gap-3">
-            <FaShieldAlt className="text-[#14B8A6] mt-0.5 shrink-0" />
-            <div className="space-y-1">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0D9488]">
-                Verified Security Protocols Active
-              </h4>
-              <p className="text-[10px] text-slate-500 font-semibold leading-normal">
-                Your profile information is transmitted securely and stored privately. Account deletion will permanently erase all search history, generated drafts, and saved profile data.
-              </p>
+          {/* Privacy & Data */}
+          <Card className="border border-[#0F172A]/5 p-6 bg-white shadow-sm space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <FaShieldAlt className="text-[#14B8A6] text-xl" />
+              <h3 className="font-serif text-xl font-bold text-[#0F172A]">Privacy & Data</h3>
+            </div>
+            
+            <div className="space-y-4 text-sm font-medium">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">What We Use</span>
+                <p className="text-slate-700 mt-1">Information needed to personalize scheme discovery.</p>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Why</span>
+                <p className="text-slate-700 mt-1">To identify potentially relevant welfare schemes and check eligibility criteria deterministically.</p>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Who Controls It</span>
+                <p className="text-slate-700 mt-1">You control your profile data. You can delete your account at any time.</p>
+              </div>
             </div>
           </Card>
 

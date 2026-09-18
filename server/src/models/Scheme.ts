@@ -102,6 +102,15 @@ const schemeSchema = new mongoose.Schema(
     website: String,
     officeHours: String,
     supportLanguages: [String],
+    applicationMethods: [{
+      type: String,
+      enum: ["online", "bank", "csc", "government_office", "assisted"],
+    }],
+    applicationOffice: String,
+    bankRequired: { type: Boolean, default: false },
+    bankPurpose: String,
+    applicationFee: String,
+    processingTime: String,
   },
   {
     timestamps: true,

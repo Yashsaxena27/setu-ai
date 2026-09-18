@@ -29,6 +29,7 @@ import dashboardRoutes from "./routes/dashboard";
 import pipelineRoutes from "./routes/pipeline";
 import userApplicationsRoutes from "./routes/userApplications";
 import intelligenceRoutes from "./routes/intelligence";
+import consentRoutes from "./routes/consent";
 import { initScheduler } from "./scripts/scheduler";
 import { errorHandler } from "./middleware/errorHandler";
 import { generalLimiter, aiLimiter } from "./middleware/rateLimiter";
@@ -91,6 +92,7 @@ app.use("/dashboard", dashboardRoutes);
 app.use("/pipeline", pipelineRoutes);
 app.use("/applications", userApplicationsRoutes);
 app.use("/intelligence", intelligenceRoutes);
+app.use("/consent", consentRoutes);
 
 // Centralized error handler
 app.use(errorHandler);

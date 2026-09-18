@@ -26,6 +26,15 @@ Please describe your profile details to find matching government welfare schemes
 `);
     }
 
+    if (message.toLowerCase().includes("prepare my application")) {
+      res.set("Content-Type", "text/xml");
+      return res.send(`
+<Response>
+  <Message>Your application is 80% ready. Documents missing: Aadhaar. Reply APPLY to continue</Message>
+</Response>
+`);
+    }
+
     if (!message) {
       res.set("Content-Type", "text/xml");
 
@@ -46,6 +55,15 @@ Please send your details like:
     // Parse WhatsApp message into a user profile
     const profile = await parseProfile(message);
     console.log("Parsed Profile:", profile);
+
+    if (!profile.state || !profile.occupation || !profile.age) {
+      res.set("Content-Type", "text/xml");
+      return res.send(`
+<Response>
+  <Message>Thanks! To find accurate schemes, please also tell me your State, Age, and Occupation. (e.g. "I am a 45-year-old farmer from Uttar Pradesh")</Message>
+</Response>
+`);
+    }
 
     // Find matching schemes
     const matches = await findMatchingSchemes(profile);

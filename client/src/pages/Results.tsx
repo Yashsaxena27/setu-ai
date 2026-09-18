@@ -230,8 +230,16 @@ export default function Results() {
             </p>
           </div>
 
-          {/* Potential Welfare Benefits Summary & Gap Card */}
-          {matches.length > 0 && (
+          {matches.length === 0 ? (
+            <div className="bg-white border border-[#0F172A]/5 rounded-3xl p-8 text-center space-y-4 shadow-soft">
+              <h2 className="font-serif text-2xl font-bold text-slate-800">No exact matches yet.</h2>
+              <p className="text-slate-500 font-medium text-sm max-w-md mx-auto">
+                Based on your current profile, you do not meet the exact criteria for the evaluated schemes. 
+                However, {nonMatches.length} schemes may become relevant if your profile changes.
+              </p>
+              <Button onClick={() => navigate("/profile")}>Update Profile</Button>
+            </div>
+          ) : (
             <div className="space-y-6">
               <BenefitGapCard
                 potentialBenefits={benefitSummary.maxMonetary > 0 ? benefitSummary.maxMonetary : 72000}
@@ -413,6 +421,16 @@ export default function Results() {
                           )}
                         </div>
 
+                        {/* Application Readiness Summary */}
+                        <div className="flex flex-wrap items-center gap-4 text-xs font-bold border-t border-slate-100/50 pt-3">
+                          <span className="flex items-center gap-1.5 text-slate-500">
+                            <span className="text-[#14B8A6]">📄</span> {scheme.required_documents?.length || 0} required documents
+                          </span>
+                          <span className="flex items-center gap-1.5 text-indigo-600">
+                            🎯 Readiness: {successScores[scheme._id] !== undefined ? `${successScores[scheme._id]}%` : '...'}
+                          </span>
+                        </div>
+
                         {/* Compare Option & Action buttons */}
                         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
                           <label className={`flex items-center gap-2 text-xs font-semibold text-slate-500 cursor-pointer ${
@@ -477,12 +495,12 @@ export default function Results() {
                             <Button
                               size="sm"
                               onClick={() =>
-                                navigate(`/draft/${scheme._id}`, {
+                                navigate(`/apply/${scheme._id}`, {
                                   state: scheme,
                                 })
                               }
                             >
-                              Prep Draft <FaArrowRight className="ml-1.5 h-3 w-3" />
+                              View Action Plan <FaArrowRight className="ml-1.5 h-3 w-3" />
                             </Button>
                           </div>
                         </div>

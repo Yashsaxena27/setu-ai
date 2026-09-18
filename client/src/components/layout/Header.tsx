@@ -17,6 +17,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isOnline, setIsOnline] = useState(window.navigator.onLine);
   
   const hasConsent = localStorage.getItem("userConsent") === "true";
 
@@ -25,8 +26,17 @@ export default function Header() {
       setScrolled(window.scrollY > 20);
     };
 
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, []);
 
   const handleFeaturesClick = (e: React.MouseEvent) => {
@@ -74,14 +84,21 @@ export default function Header() {
         >
           <div className="flex items-center justify-between">
             {/* Logo with Bridge Motif SVG */}
-            <Link
-              to="/"
-              onClick={handleHomeClick}
-              data-hover-target="true"
-              className="group"
-            >
-              <Logo className="text-lg text-[#0F172A] group-hover:opacity-80 transition" />
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                to="/"
+                onClick={handleHomeClick}
+                data-hover-target="true"
+                className="group"
+              >
+                <Logo className="text-lg text-[#0F172A] group-hover:opacity-80 transition" />
+              </Link>
+              {!isOnline && (
+                <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                  Offline Mode
+                </span>
+              )}
+            </div>
 
             {/* Desktop Navigation Links */}
             <nav className="hidden items-center justify-center flex-1 gap-4 lg:gap-7 lg:flex">

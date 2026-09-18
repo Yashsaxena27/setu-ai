@@ -21,3 +21,13 @@ export const getRejectionRecovery = async (schemeId: string) => {
     body: JSON.stringify({ schemeId }),
   });
 };
+
+export const startApplication = async (id: string) => {
+  return await api<any>(`/applications/${id}/start`, {
+    method: "POST",
+  });
+};
+
+export const getApplicationEvents = async (id: string) => {
+  return await api<any>(`/applications/${id}/events`);
+};

@@ -25,6 +25,8 @@ const userSchema = new mongoose.Schema(
 
     education: String,
 
+    marital_status: String,
+
     disability: String,
 
     language: String,

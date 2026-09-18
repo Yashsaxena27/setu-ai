@@ -106,46 +106,32 @@ This architecture ensures **the AI never tells a citizen they qualify for someth
 
 ## Features
 
-### Core Matching & Discovery
+### Core Discovery & Intelligence
 
 | Feature | What It Does |
 |---|---|
 | **Hybrid RAG Matching** | Combines vector similarity search with strict rule-based filters across 86+ schemes. AI finds relevant schemes; deterministic rules guarantee accuracy. |
-| **Explainable AI** | Every match comes with a plain-language explanation of *why* the citizen qualifies — no black-box outputs. |
-| **Benefit Gap Calculator** | Shows citizens how much unclaimed welfare money they're leaving on the table (potential vs. already receiving vs. missing). |
-| **Scheme Comparison** | Side-by-side comparison matrix of any two schemes across benefits, eligibility, documents, and portals. |
+| **Matching Explainability 2.0** | Every match comes with a plain-language explanation of *why* the citizen qualifies. Zero matches are gracefully explained. |
+| **Life Event Intelligence** | Profile updates (like marriage, college enrollment, job loss) instantly recalculate eligibility and surface new welfare opportunities. |
+| **Trust Panel Verification** | Clear indicators on all schemes detailing the Official Source and Last Verified Date. |
 
-### Profile & Documents
-
-| Feature | What It Does |
-|---|---|
-| **DigiLocker Auto-Profile** | Simulates DigiLocker OAuth to auto-extract citizen data from Aadhaar/PAN, with smart diff-merge to fill profile gaps. |
-| **Multimodal Document Verification** | Gemini Vision OCR extracts text from uploaded documents, validates name matching, checks image quality, detects expiration, and scores document readiness. |
-| **5-Dimensional Success Score** | Weighted readiness score across Eligibility (40%), Documents (30%), Profile (15%), Verification (10%), and Draft (5%) — tells citizens exactly how ready they are to apply. |
-
-### Application Journey
+### Application Readiness & Journey
 
 | Feature | What It Does |
 |---|---|
-| **8-Step Application Roadmap** | Interactive step-by-step guide from profile creation to benefit receipt. Tracks progress, estimates time, and links to relevant portals. |
-| **Application Draft Generator** | AI generates a pre-filled, formal government application letter ready for submission. Exportable as A4 PDF. |
-| **Nearby Help Panel** | Shows the nearest Common Service Centre (CSC), Krishi Bhavan, or District Office based on the citizen's location. |
-| **Deadline Reminders** | Personal reminder system for application deadlines, document renewal dates, and status check-ins. |
+| **Application Package 2.0** | A single consolidated view containing applicant info, scheme details, document checklist, and an auto-generated draft, ready to copy or print. |
+| **Assisted Application Experience** | Contextual step-by-step instructions for where to apply (Online, Bank, CSC, Gov Office). |
+| **Application Tracking 2.0** | Timeline tracking of scheme applications, capturing status updates natively and displaying clear labels for data sources. |
+| **Success Readiness Score** | 5-dimensional score determining exact readiness to apply, preventing premature applications and saving citizen time. |
 
-### Household & Simulation
-
-| Feature | What It Does |
-|---|---|
-| **Household Scheme Intelligence** | Add family members (spouse, parents, children, dependents) and run collective welfare analysis. Detects when multiple members apply for conflicting or duplicate schemes. |
-| **Eligibility Simulator** | Sandbox for "what-if" scenarios — change income, state, occupation, or age to see how eligibility shifts in real-time without affecting the actual profile. |
-
-### Communication & Accessibility
+### Household & Communication
 
 | Feature | What It Does |
 |---|---|
-| **Grounded AI Copilot** | Conversational assistant powered by RAG. Answers questions about schemes with source citations and explainability logs. Supports voice input via Web Speech API. |
-| **Scheme Change Tracker** | Monitors policy updates (income limit changes, eligibility expansions, deadline extensions) and notifies affected citizens with visual diffs of what changed. |
-| **Voice Input** | Browser-based speech recognition in Hindi and English for hands-free profile input and chat interaction. |
+| **Family Welfare Dashboard** | Lightweight category-based view for the whole household's welfare opportunities. |
+| **Multi-Channel Fallback** | Voice-first Hinglish IVR and WhatsApp capabilities to bridge the digital divide. |
+| **PWA & Offline Mode** | Safe caching and offline UI states allow users to view their application package and tracking without an active internet connection. |
+| **Privacy Center** | Transparent "What We Use" and "Who Controls It" disclosures integrated directly into user settings and consent flows. |
 
 ### Administration
 

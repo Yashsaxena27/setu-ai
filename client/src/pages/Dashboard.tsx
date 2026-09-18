@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaUserEdit, FaSearch, FaFileAlt, FaUsers, FaRobot, FaShieldAlt } from "react-icons/fa";
+import { FaUserEdit, FaSearch, FaFileAlt, FaUsers } from "react-icons/fa";
 
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -121,6 +121,8 @@ export default function Dashboard() {
     { label: "Scheme Tracker", active: false, onClick: () => navigate("/scheme-updates") },
     { label: "AI Copilot", active: false, onClick: () => navigate("/chat") },
     ...(isAdmin ? [{ label: "Admin Console", active: false, onClick: () => navigate("/admin") }] : []),
+    { label: "My Applications", active: false, onClick: () => navigate("/my-applications") },
+    { label: "Life Events", active: false, onClick: () => navigate("/life-events") },
     { label: "Account Settings", active: false, onClick: () => navigate("/settings") },
   ];
 
@@ -195,55 +197,41 @@ export default function Dashboard() {
               </Card>
 
               {/* Quick Actions Panel */}
-              <Card className="border border-[#0F172A]/5 flex flex-col justify-between">
-                <div>
-                  <SectionHeader title="Quick Actions" />
-                  <p className="text-sm text-slate-500 font-medium mb-6">
-                    Manage your profile parameters, compare verified schemes, or test eligibility thresholds.
-                  </p>
-                </div>
-                <div className="space-y-3">
+              <Card className="border border-[#0F172A]/5 flex flex-col justify-between p-6">
+                <SectionHeader title="Quick Actions" />
+                <div className="grid grid-cols-2 gap-3 mt-4">
                   <Button
-                    onClick={() => navigate("/profile", { state: { from: "/dashboard", label: "Dashboard" } })}
-                    className="w-full justify-between"
-                  >
-                    <span>Update Citizen Profile</span>
-                    <FaUserEdit />
-                  </Button>
-                  <Button
+                    variant="secondary"
+                    className="h-24 flex flex-col items-center justify-center gap-2 hover:border-[#14B8A6] hover:bg-[#14B8A6]/5"
                     onClick={() => navigate("/results")}
-                    variant="secondary"
-                    className="w-full justify-between"
                   >
-                    <span>View Matched Schemes</span>
-                    <FaSearch />
+                    <FaSearch className="text-[#14B8A6] text-xl" />
+                    <span className="text-xs">Find Schemes</span>
                   </Button>
                   <Button
-                    onClick={() => navigate("/family")}
                     variant="secondary"
-                    className="w-full justify-between"
+                    className="h-24 flex flex-col items-center justify-center gap-2 hover:border-[#14B8A6] hover:bg-[#14B8A6]/5"
+                    onClick={() => navigate("/profile")}
                   >
-                    <span>Family Household</span>
-                    <FaUsers />
+                    <FaUserEdit className="text-[#14B8A6] text-xl" />
+                    <span className="text-xs">Complete Profile</span>
                   </Button>
                   <Button
-                    onClick={() => navigate("/chat")}
                     variant="secondary"
-                    className="w-full justify-between"
+                    className="h-24 flex flex-col items-center justify-center gap-2 hover:border-[#14B8A6] hover:bg-[#14B8A6]/5"
+                    onClick={() => navigate("/my-applications")}
                   >
-                    <span>AI Copilot</span>
-                    <FaRobot />
+                    <FaFileAlt className="text-[#14B8A6] text-xl" />
+                    <span className="text-xs">My Applications</span>
                   </Button>
-                  {isAdmin && (
-                    <Button
-                      onClick={() => navigate("/admin")}
-                      variant="primary"
-                      className="w-full justify-between bg-slate-900 border-none text-[#14B8A6]"
-                    >
-                      <span>Admin Console</span>
-                      <FaShieldAlt />
-                    </Button>
-                  )}
+                  <Button
+                    variant="secondary"
+                    className="h-24 flex flex-col items-center justify-center gap-2 hover:border-[#14B8A6] hover:bg-[#14B8A6]/5"
+                    onClick={() => navigate("/life-events")}
+                  >
+                    <FaUsers className="text-[#14B8A6] text-xl" />
+                    <span className="text-xs">Life Events</span>
+                  </Button>
                 </div>
               </Card>
             </div>

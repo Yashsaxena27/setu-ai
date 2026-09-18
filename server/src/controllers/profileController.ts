@@ -38,3 +38,34 @@ export const updateProfile = async (
     res.status(500).json({ success: false, message: "Failed to update profile" });
   }
 };
+
+import { findMatchingSchemes } from "../services/matchingService";
+
+export const recordLifeEvent = async (req: AuthRequest, res: Response) => {
+  try {
+    const { event } = req.body;
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    let updated = false;
+    if (event === "college_enrollment") {
+      user.occupation = "Student";
+      updated = true;
+    } else if (event === "marriage") {
+      user.marital_status = "Married";
+      updated = true;
+    } else if (event === "job_loss") {
+      user.occupation = "Unemployed";
+      updated = true;
+    }
+
+    if (updated) {
+      await user.save();
+    }
+
+    const newMatches = await findMatchingSchemes(user.toObject ? user.toObject() : user);
+    res.json({ success: true, newMatches });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to record life event" });
+  }
+};
