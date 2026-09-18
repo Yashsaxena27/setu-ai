@@ -147,13 +147,18 @@ export default function ApplicationPackage() {
 
   const onlineMethod = applicationMethods?.find((m: any) => m.type === "online" && m.link);
 
+  const [isStarting, setIsStarting] = useState(false);
+
   const handleStart = async () => {
+    if (isStarting) return;
+    setIsStarting(true);
     try {
       await startApplication(schemeId!);
       toast.success("Application started!");
       navigate("/my-applications");
     } catch (err) {
       toast.error("Failed to start application");
+      setIsStarting(false);
     }
   };
 
@@ -330,8 +335,8 @@ export default function ApplicationPackage() {
               Apply Now <FaExternalLinkAlt className="ml-1.5 h-3 w-3" />
             </Button>
           ) : (
-            <Button onClick={handleStart}>
-              Start Application
+            <Button onClick={handleStart} disabled={isStarting}>
+              {isStarting ? "Starting..." : "Start Application"}
             </Button>
           )}
         </div>
